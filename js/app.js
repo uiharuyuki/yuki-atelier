@@ -181,6 +181,16 @@
       el("h2", { class: "section-title", text: "3つの学び方" }), cards
     ]));
 
+    // ブランチ解説ページへの導線（別ページ branch.html）
+    view.appendChild(el("a", { class: "branch-banner", href: "branch.html" }, [
+      el("span", { class: "branch-banner-icon", "aria-hidden": "true", text: "🌿" }),
+      el("span", {}, [
+        el("strong", { text: "ブランチを学ぶ（解説ページ）" }),
+        el("span", { class: "branch-banner-sub", text: "main と作業ブランチの違い・分岐と合流のしくみを図解で確認できます。" })
+      ]),
+      el("span", { class: "branch-banner-arrow", "aria-hidden": "true", text: "→" })
+    ]));
+
     // 4エリアの概念図（静的な説明）
     view.appendChild(el("section", { class: "home-section" }, [
       el("h2", { class: "section-title", text: "覚えるのは“4つの場所”の動きだけ" }),

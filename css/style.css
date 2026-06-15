@@ -93,6 +93,7 @@ button { font-family: inherit; }
   background: transparent; border: none; cursor: pointer;
   padding: 10px 12px; border-radius: var(--radius-sm);
   color: var(--text-muted); font-size: .95rem; font-weight: 600;
+  text-decoration: none; display: inline-flex; align-items: center;
 }
 .nav-link:hover { background: var(--bg-soft); color: var(--text); }
 .nav-link.active { color: var(--accent); background: rgba(9,105,218,.08); }
@@ -376,3 +377,122 @@ main { padding: 24px 0 56px; min-height: 60vh; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* =====================================================================
+ * ブランチ解説ページ（branch.html）専用スタイル
+ * ===================================================================== */
+.branch-section { margin: 28px 0; }
+.nowrap { white-space: nowrap; }
+
+/* 補足ボックス */
+.callout {
+  border-radius: var(--radius-sm); padding: 12px 14px; margin: 14px 0;
+  font-size: .92rem; border: 1px solid var(--border);
+}
+.callout-info { background: #eef4fc; border-color: #bcd6f5; }
+.callout-warn { background: #fff8e5; border-color: #f0d58a; color: var(--amber); }
+.callout code { background: rgba(0,0,0,.05); padding: 1px 5px; border-radius: 4px; }
+
+/* main と feature の比較カード */
+.compare-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 16px 0; }
+.compare-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow);
+  border-top: 4px solid var(--border-strong);
+}
+.compare-main { border-top-color: var(--green); }
+.compare-feature { border-top-color: #8250df; }
+.compare-title { font-size: 1.05rem; margin-bottom: 8px; }
+.compare-card ul { margin: 0; padding-left: 1.2em; }
+.compare-card li { margin: 4px 0; font-size: .92rem; }
+
+/* 比較テーブル */
+.branch-table {
+  width: 100%; border-collapse: collapse; margin: 16px 0; font-size: .9rem;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden;
+}
+.branch-table th, .branch-table td {
+  text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.branch-table thead th { background: var(--bg-soft); font-size: .85rem; }
+.branch-table tr:last-child td { border-bottom: none; }
+.branch-table code { background: var(--bg-soft); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border); }
+.cmd-table-wrap { overflow-x: auto; }
+
+/* 横スクロール可能なコード/長い文字を含むテーブル対策 */
+.branch-section code { word-break: break-word; }
+
+/* ===== CSSだけで描くブランチ図 ===== */
+.git-graph {
+  display: flex; flex-direction: column; gap: 14px;
+  background: var(--bg-soft); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px; margin: 16px 0;
+}
+.glane {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
+}
+.glane-head { font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.glane-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.glane-main .glane-dot { background: var(--green); }
+.glane-feature .glane-dot { background: #8250df; }
+
+.gcommits { list-style: none; margin: 0; padding: 0; }
+.gc { position: relative; padding: 8px 0 8px 28px; font-size: .9rem; }
+/* ノード（丸） */
+.gc::before {
+  content: ""; position: absolute; left: 0; top: 13px;
+  width: 14px; height: 14px; border-radius: 50%; background: #fff; z-index: 1;
+}
+.glane-main .gc::before { border: 3px solid var(--green); }
+.glane-feature .gc::before { border: 3px solid #8250df; }
+/* ノード間をつなぐ縦線 */
+.gc::after {
+  content: ""; position: absolute; left: 6px; top: 13px; bottom: -8px; width: 2px;
+}
+.glane-main .gc::after { background: #9fd3ad; }
+.glane-feature .gc::after { background: #cbb6ef; }
+.gc:last-child::after { display: none; }
+.gc-split { color: var(--accent-dark); font-weight: 700; }
+.gc-merge, .gc-done { color: var(--green-dark); font-weight: 700; }
+.gc code { background: var(--bg-soft); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border); }
+
+/* レーン間の分岐・合流ラベル */
+.gconnect { display: flex; justify-content: space-between; gap: 10px; }
+.gconnect-arrow { font-size: .82rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.gconnect-split { background: #eef4fc; color: var(--accent-dark); border: 1px solid #bcd6f5; }
+.gconnect-merge { background: #ddf4e4; color: var(--green-dark); border: 1px solid #ace0bd; }
+
+/* 理由リスト */
+.reason-list { margin: 12px 0; padding-left: 1.2em; }
+.reason-list li { margin: 6px 0; }
+
+/* ページ下部の導線ボタン */
+.branch-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+/* 広い画面ではブランチ図を横並び（main｜分岐合流｜feature） */
+@media (min-width: 760px) {
+  .compare-grid { grid-template-columns: 1fr 1fr; }
+  .git-graph { flex-direction: row; align-items: stretch; }
+  .glane { flex: 1; }
+  .gconnect {
+    flex-direction: column; justify-content: space-between;
+    align-items: center; padding: 24px 0; flex: 0 0 auto;
+  }
+  .gconnect-arrow { writing-mode: horizontal-tb; }
+}
+
+/* ホームからブランチ解説ページへの導線バナー */
+.branch-banner {
+  display: flex; align-items: center; gap: 14px; margin-top: 20px;
+  background: linear-gradient(180deg, #f0f7f2, #e6f2ea);
+  border: 1px solid #ace0bd; border-radius: var(--radius);
+  padding: 16px 18px; text-decoration: none; color: var(--text);
+  box-shadow: var(--shadow); transition: transform .08s, border-color .15s;
+}
+.branch-banner:hover { transform: translateY(-2px); border-color: var(--green); }
+.branch-banner-icon { font-size: 1.6rem; }
+.branch-banner-sub { display: block; color: var(--text-muted); font-size: .88rem; margin-top: 2px; }
+.branch-banner-arrow { margin-left: auto; font-size: 1.3rem; color: var(--green-dark); }

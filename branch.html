@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gitのブランチとは何か、mainと作業ブランチ(feature)の違いと使い分け、分岐・合流(merge)のしくみを図解で学ぶページ。" />
+  <title>ブランチを学ぶ ｜ Git Visual Trainer</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ===== ヘッダー / ナビ（index.htmlと統一） ===== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html#home">
+        <span class="brand-mark" aria-hidden="true">⎇</span>
+        <span class="brand-text">Git&nbsp;Visual&nbsp;Trainer</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav">
+        <span class="sr-only">メニューを開閉</span>
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+      </button>
+      <nav class="primary-nav" id="primaryNav" aria-label="メインメニュー">
+        <a class="nav-link" href="index.html#home">ホーム</a>
+        <a class="nav-link" href="index.html#situations">状況から学ぶ</a>
+        <a class="nav-link" href="index.html#commands">コマンドから学ぶ</a>
+        <a class="nav-link" href="index.html#simulator">シミュレーター</a>
+        <a class="nav-link" href="index.html#quiz">クイズで復習</a>
+        <a class="nav-link active" href="branch.html" aria-current="page">ブランチを学ぶ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" id="app" tabindex="-1">
+    <article class="view" style="display:block">
+
+      <h1 class="view-title">ブランチを学ぶ</h1>
+      <p class="view-lead">
+        ブランチ（branch＝枝）は、Gitでいちばんつまずきやすい所です。
+        ここでは「ブランチとは何か」「<code>main</code> と作業ブランチの違い」「分岐と合流（merge）のしくみ」を、
+        図を見ながら整理します。コマンドの動きを試したくなったら、いつでも
+        <a href="index.html#simulator">シミュレーター</a>へ。
+      </p>
+
+      <!-- ① ブランチとは -->
+      <section class="branch-section">
+        <h2 class="section-title">① ブランチとは？</h2>
+        <p>
+          ブランチは <strong>「作業の枝分かれ」</strong> です。
+          同じプロジェクトの中に“もう一つの作業ライン”を作り、
+          <strong>元の状態を壊さずに別の変更を進められる</strong>しくみです。
+        </p>
+        <p>
+          たとえば本番用の流れ（<code>main</code>）はそのままに、
+          新機能や試作だけを別ブランチで進め、できあがってから本番に合流させます。
+          失敗しても本番に影響しないのが大きな利点です。
+        </p>
+        <div class="callout callout-info">
+          <strong>イメージ：</strong>
+          1冊のノートをコピーして「下書き用」を作る感覚。下書きで好きに試して、
+          OKなら本物のノートに書き写す（=merge）、ダメなら捨てる、ができます。
+        </div>
+      </section>
+
+      <!-- ② main と 作業ブランチの違い -->
+      <section class="branch-section">
+        <h2 class="section-title">② <code>main</code> と 作業ブランチ（feature）の違い</h2>
+        <p>同じ「ブランチ」でも、役割が違います。使い分けが分かると一気に楽になります。</p>
+
+        <div class="compare-grid">
+          <div class="compare-card compare-main">
+            <h3 class="compare-title">main ブランチ</h3>
+            <ul>
+              <li>プロジェクトの<strong>基準となる流れ</strong></li>
+              <li>基本的に<strong>いつでも動く状態</strong>を保つ</li>
+              <li>ここで直接いきなり実験はしない</li>
+              <li>完成した変更を合流させていく場所</li>
+            </ul>
+          </div>
+          <div class="compare-card compare-feature">
+            <h3 class="compare-title">作業ブランチ（feature など）</h3>
+            <ul>
+              <li><code>main</code> から<strong>枝分かれして作る</strong></li>
+              <li>新機能・修正・試作を<strong>気軽に試す</strong>場所</li>
+              <li>失敗しても <code>main</code> に影響しない</li>
+              <li>完成したら <code>main</code> に合流（merge）する</li>
+            </ul>
+          </div>
+        </div>
+
+        <table class="branch-table">
+          <caption class="sr-only">mainと作業ブランチの比較</caption>
+          <thead>
+            <tr><th>観点</th><th>main</th><th>作業ブランチ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>役割</td><td>基準・本番</td><td>試作・作業</td></tr>
+            <tr><td>安定性</td><td>常に動く状態を保つ</td><td>途中でも壊れてOK</td></tr>
+            <tr><td>作り方</td><td>最初からある</td><td><code>git switch -c 名前</code> で作る</td></tr>
+            <tr><td>終わり方</td><td>ずっと残る</td><td>合流したら役目を終える</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ③ 分岐・合流の図解 -->
+      <section class="branch-section">
+        <h2 class="section-title">③ 分岐と合流（merge）のしくみ</h2>
+        <p>
+          作業ブランチは <code>main</code> の途中から<strong>分岐</strong>し、
+          作業が終わったら <code>main</code> に<strong>合流（merge）</strong>します。
+          下の図は、その流れを上から下へ表したものです。
+        </p>
+
+        <!-- CSSだけで描くブランチ図（画像なし） -->
+        <div class="git-graph" role="img"
+             aria-label="mainブランチの2つ目のコミットからfeatureブランチが分岐し、featureで2回作業したあとmainへ合流する流れの図">
+          <div class="glane glane-main">
+            <div class="glane-head"><span class="glane-dot"></span> main ブランチ</div>
+            <ol class="gcommits">
+              <li class="gc">最初のコミット</li>
+              <li class="gc gc-split">ここで <code>git switch -c feature</code>（分岐）</li>
+              <li class="gc">mainは必要に応じて進められる</li>
+              <li class="gc gc-merge">feature を合流（merge）して完成</li>
+            </ol>
+          </div>
+
+          <div class="gconnect" aria-hidden="true">
+            <span class="gconnect-arrow gconnect-split">分岐 →</span>
+            <span class="gconnect-arrow gconnect-merge">← 合流</span>
+          </div>
+
+          <div class="glane glane-feature">
+            <div class="glane-head"><span class="glane-dot"></span> feature ブランチ</div>
+            <ol class="gcommits">
+              <li class="gc">機能の作業 ①</li>
+              <li class="gc">機能の作業 ②</li>
+              <li class="gc gc-done">完成 → mainへ戻す</li>
+            </ol>
+          </div>
+        </div>
+        <p class="muted small">
+          ※ このサイトのシミュレーターは分岐・移動までを再現します。merge（合流）は今後の追加予定の機能です。
+        </p>
+      </section>
+
+      <!-- ④ なぜこのサイトは claude/... ブランチにある？ -->
+      <section class="branch-section">
+        <h2 class="section-title">④ なぜ今このサイトは <code>claude/…</code> ブランチにあるの？</h2>
+        <p>
+          まさに②③の考え方の実例です。このサイトは <code>main</code> に直接作らず、
+          <code class="nowrap">claude/git-visual-trainer-m7o9de</code> という<strong>作業ブランチ</strong>で作られています。
+        </p>
+        <ul class="reason-list">
+          <li><strong>mainを汚さない：</strong>未完成の状態を本番（main）に混ぜずに作業できます。</li>
+          <li><strong>安全に試せる：</strong>このブランチで自由にプレビュー・修正できます。</li>
+          <li><strong>納得してから合流：</strong>内容を確認し、OKになったら <code>main</code> に合流（マージ）して公開します。</li>
+        </ul>
+        <div class="callout callout-info">
+          先ほどのGitHub Pagesプレビューも、この作業ブランチを指定して表示していました。
+          「作業ブランチで作って、確認できたらmainへ」——これが普段の開発の基本リズムです。
+        </div>
+      </section>
+
+      <!-- ⑤ 関連コマンド -->
+      <section class="branch-section">
+        <h2 class="section-title">⑤ ブランチでよく使うコマンド</h2>
+        <div class="cmd-table-wrap">
+          <table class="branch-table">
+            <thead>
+              <tr><th>コマンド</th><th>意味</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>git branch</code></td><td>ブランチ一覧を見る（<code>*</code> が今いる場所）</td></tr>
+              <tr><td><code>git switch ブランチ名</code></td><td>既存ブランチへ移動する</td></tr>
+              <tr><td><code>git switch -c ブランチ名</code></td><td>新しいブランチを作って同時に移動する（<code>-c</code>＝create）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-warn">
+          <strong>⚠ よくある勘違い：</strong>
+          <code>git branch 名前</code> は<strong>作るだけで移動しません</strong>。
+          作って移動までしたいときは <code>git switch -c 名前</code> を使います。
+        </div>
+        <p class="branch-cta">
+          <a class="btn btn-primary" href="index.html#simulator">シミュレーターで branch / switch を試す</a>
+          <a class="btn btn-ghost" href="index.html#commands">コマンドの詳細を見る</a>
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Git Visual Trainer — Gitの基本操作を“状態の変化”で学ぶ学習用サイト</p>
+      <p class="muted">本物のGitは動きません。すべて学習用の疑似デモです。</p>
+    </div>
+  </footer>
+
+  <!-- このページはSPAではないので、モバイルメニューの開閉だけ最小限のJSで対応 -->
+  <script>
+    (function () {
+      var toggle = document.getElementById("navToggle");
+      var nav = document.getElementById("primaryNav");
+      if (toggle && nav) {
+        toggle.addEventListener("click", function () {
+          var open = nav.classList.toggle("open");
+          toggle.setAttribute("aria-expanded", String(open));
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
