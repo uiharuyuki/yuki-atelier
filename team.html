@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="複数人でリポジトリを共有して開発するときのGit/GitHub運用ガイド。mainを守る基本原則、ブランチ→Pull Request→レビュー→マージの1サイクル、マージ戦略の違い、やってはいけないことを図解で学ぶページ。" />
+  <title>チーム開発を学ぶ ｜ Git Visual Trainer</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- ===== ヘッダー / ナビ（index.html・branch.htmlと統一） ===== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html#home">
+        <span class="brand-mark" aria-hidden="true">⎇</span>
+        <span class="brand-text">Git&nbsp;Visual&nbsp;Trainer</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav">
+        <span class="sr-only">メニューを開閉</span>
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+      </button>
+      <nav class="primary-nav" id="primaryNav" aria-label="メインメニュー">
+        <a class="nav-link" href="index.html#home">ホーム</a>
+        <a class="nav-link" href="index.html#situations">状況から学ぶ</a>
+        <a class="nav-link" href="index.html#commands">コマンドから学ぶ</a>
+        <a class="nav-link" href="index.html#simulator">シミュレーター</a>
+        <a class="nav-link" href="index.html#quiz">クイズで復習</a>
+        <a class="nav-link" href="branch.html">ブランチを学ぶ</a>
+        <a class="nav-link active" href="team.html" aria-current="page">チーム開発</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" id="app" tabindex="-1">
+    <article class="view" style="display:block">
+
+      <h1 class="view-title">チーム開発を学ぶ</h1>
+      <p class="view-lead">
+        複数人で1つのリポジトリを共有すると、「誰かの変更で自分の作業が消える」「<code>main</code> が壊れる」といった事故が起きやすくなります。
+        それを防ぐのが <strong>ブランチ → Pull Request（PR）→ レビュー → マージ</strong> という決まったリズムです。
+        ここでは、その1サイクルと注意点を図で整理します。ブランチそのものが不安なら、先に
+        <a href="branch.html">ブランチを学ぶ</a>へ。コマンドの動きは
+        <a href="index.html#simulator">シミュレーター</a>で試せます。
+      </p>
+
+      <!-- ① 基本原則 -->
+      <section class="branch-section">
+        <h2 class="section-title">① まず守る4つの基本原則</h2>
+        <p>細かいコマンドより先に、この4つだけは全員で守ります。ほとんどの事故はここで防げます。</p>
+        <div class="compare-grid">
+          <div class="compare-card compare-main">
+            <h3 class="compare-title">守ること</h3>
+            <ul>
+              <li><strong>main には直接 push しない</strong>（必ずPR経由で反映）</li>
+              <li><strong>作業は必ずブランチを切ってから</strong>始める</li>
+              <li><strong>作業前に最新の <code>main</code> を取り込む</strong>（古い状態から分岐しない）</li>
+              <li><strong>1つのPRは1つの目的に絞る</strong>（レビューしやすく、戻しやすい）</li>
+            </ul>
+          </div>
+          <div class="compare-card compare-feature">
+            <h3 class="compare-title">なぜ？</h3>
+            <ul>
+              <li><code>main</code> は「いつでも動く本番の流れ」。壊すとチーム全員が止まる</li>
+              <li>ブランチなら、未完成でも他の人に影響しない</li>
+              <li>古い <code>main</code> からの分岐はコンフリクトの温床</li>
+              <li>大きなPRはレビュー不能・問題の切り分け不能になる</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout callout-info">
+          <strong>このサイト自体が実例です：</strong>
+          Git Visual Trainer も <code>main</code> に直接ではなく作業ブランチで作られ、確認できてから <code>main</code> に合流しています。
+          詳しくは <a href="branch.html">ブランチを学ぶ</a>の④を参照。
+        </div>
+      </section>
+
+      <!-- ② 1サイクルの全体像 -->
+      <section class="branch-section">
+        <h2 class="section-title">② 開発1サイクルの全体像</h2>
+        <p>
+          チーム開発は、下の流れをぐるぐる繰り返します。左の <code>main</code> から枝分かれして作業し、
+          PRとレビューを通って、また <code>main</code> に戻ってくる——この1周が基本単位です。
+        </p>
+
+        <!-- CSSだけで描くフロー図（branch.htmlのgit-graphを応用） -->
+        <div class="git-graph" role="img"
+             aria-label="mainを最新化してから作業ブランチを切り、作業・コミット・pushしてPRを作成、レビューと修正を経て、マージ前にmainを取り込み、mainへマージし、ブランチを削除する1サイクルの流れ図">
+          <div class="glane glane-main">
+            <div class="glane-head"><span class="glane-dot"></span> main 側（共有の流れ）</div>
+            <ol class="gcommits">
+              <li class="gc">最新の <code>main</code> を取得（<code>git pull</code>）</li>
+              <li class="gc gc-split">ここで作業ブランチを切る（<code>git switch -c feature/xxx</code>）</li>
+              <li class="gc">レビュー中も <code>main</code> は他の人のPRで進むことがある</li>
+              <li class="gc gc-merge">PRをマージして <code>main</code> に反映</li>
+            </ol>
+          </div>
+
+          <div class="gconnect" aria-hidden="true">
+            <span class="gconnect-arrow gconnect-split">分岐 →</span>
+            <span class="gconnect-arrow gconnect-merge">← マージ</span>
+          </div>
+
+          <div class="glane glane-feature">
+            <div class="glane-head"><span class="glane-dot"></span> 作業ブランチ側（自分の作業）</div>
+            <ol class="gcommits">
+              <li class="gc">作業して <code>commit</code> → <code>push</code></li>
+              <li class="gc gc-split">GitHubで <strong>PRを作成</strong>・レビュー依頼</li>
+              <li class="gc">指摘に対応（同じブランチに追記push）</li>
+              <li class="gc gc-done">マージ前に <code>main</code> を取り込み → 承認 → マージ後ブランチ削除</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <strong>1行でいうと：</strong>
+          <code>main最新を取得 → ブランチを切る → 作業・commit → push → PR作成 → レビュー → 修正 → main取り込み → マージ → ブランチ削除</code>
+        </div>
+      </section>
+
+      <!-- ③ 作業を始める前 -->
+      <section class="branch-section">
+        <h2 class="section-title">③ 作業を始める前（ブランチを切る）</h2>
+        <p>毎回この3行から始めます。「最新の <code>main</code> から枝分かれする」のが肝心です。</p>
+        <div class="mini-terminal" aria-label="作業開始時のコマンド例">git checkout main
+git pull origin main          <span class="term-info"># mainを最新にする</span>
+git switch -c feature/xxx     <span class="term-info"># 作業ブランチを切る</span></div>
+
+        <h3 class="compare-title" style="margin-top:18px">ブランチ名の付け方</h3>
+        <div class="cmd-table-wrap">
+          <table class="branch-table">
+            <caption class="sr-only">ブランチ名の接頭辞と用途</caption>
+            <thead>
+              <tr><th>接頭辞</th><th>用途</th><th>例</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>feature/</code></td><td>新機能</td><td><code>feature/login-form</code></td></tr>
+              <tr><td><code>fix/</code></td><td>バグ修正</td><td><code>fix/card-layout</code></td></tr>
+              <tr><td><code>refactor/</code></td><td>リファクタ</td><td><code>refactor/storage-layer</code></td></tr>
+              <tr><td><code>docs/</code></td><td>ドキュメント</td><td><code>docs/update-readme</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-warn">
+          <strong>⚠ 秘密情報・不要ファイルはコミットしない：</strong>
+          パスワード・APIキー・<code>.env</code> や、自動生成される <code>node_modules/</code> などは
+          <code>.gitignore</code> に書いて追跡対象から外します。
+          一度コミットしてpushした秘密情報は履歴に残り続けるため、<strong>最初に <code>.gitignore</code> を整える</strong>のが安全です。
+        </div>
+      </section>
+
+      <!-- ④ Pull Request とは -->
+      <section class="branch-section">
+        <h2 class="section-title">④ Pull Request（PR）とは？良い書き方</h2>
+        <p>
+          PRは <strong>「この変更を <code>main</code> に取り込んでください」という提案＋レビューの場</strong>です。
+          GitHub上で <code>feature/xxx → main</code> のPRを開き、レビュアーを指定して依頼します。
+          いきなりマージせず、<strong>人の目を通してから</strong> <code>main</code> に入れるのが狙いです。
+        </p>
+
+        <div class="compare-grid">
+          <div class="compare-card compare-main">
+            <h3 class="compare-title">PR説明に書くこと</h3>
+            <ul>
+              <li><strong>何を</strong>変えたか</li>
+              <li><strong>なぜ</strong>変えたか</li>
+              <li><strong>確認方法</strong> / スクリーンショット（UI変更なら）</li>
+              <li>関連Issueがあれば <code>Closes #123</code> で紐付け</li>
+            </ul>
+          </div>
+          <div class="compare-card compare-feature">
+            <h3 class="compare-title">PRを上手に使うコツ</h3>
+            <ul>
+              <li><strong>小さく保つ</strong>（巨大PRはレビュー不能）</li>
+              <li>まだ途中なら <strong>Draft（下書き）PR</strong> にして「レビューはまだ」と示す</li>
+              <li>依頼前に自分でも一度 diff を読み返す（self-review）</li>
+              <li>議論はPRのコメントに残す（後から経緯を追える）</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <strong>Issueの自動クローズ：</strong>
+          PR説明に <code>Closes #123</code> / <code>Fixes #123</code> / <code>Resolves #123</code> と書くと、
+          そのPRが <code>main</code>（デフォルトブランチ）にマージされたとき、対応するIssueが自動で閉じます。
+          ※デフォルトブランチ向けのPRでのみ有効です。
+        </div>
+      </section>
+
+      <!-- ⑤ レビュー対応とマージ前のmain取り込み -->
+      <section class="branch-section">
+        <h2 class="section-title">⑤ レビュー対応 → マージ前に <code>main</code> を取り込む</h2>
+        <p>
+          レビューで指摘があっても、<strong>PRを作り直す必要はありません</strong>。
+          同じブランチに追加コミットして push すれば、PRは自動で更新されます。
+        </p>
+        <p>
+          そして作業中に、他の人のPRが先に <code>main</code> にマージされていることがあります。
+          自分のPRをきれいにマージできる状態にするため、<strong>マージ前に <code>main</code> の最新を取り込みます</strong>。
+        </p>
+        <div class="mini-terminal" aria-label="マージ前にmainを取り込むコマンド例">git switch feature/xxx
+git pull origin main     <span class="term-info"># mainの変更を取り込む</span>
+<span class="term-info"># コンフリクトがあれば解消 → commit</span>
+git push</div>
+        <div class="callout callout-info">
+          指摘対応のたびに新しいPRを作らないこと。<strong>1つのPRを育てていく</strong>イメージです。
+          こうすると議論とコミットが1か所にまとまり、後から経緯を追えます。
+        </div>
+      </section>
+
+      <!-- ⑥ マージ戦略 -->
+      <section class="branch-section">
+        <h2 class="section-title">⑥ マージ方法の選び方</h2>
+        <p>
+          承認（Approve）されたら、GitHubの <strong>Merge</strong> ボタンで <code>main</code> に反映します。
+          マージには3つの方式があり、<strong>main の履歴の見え方</strong>が変わります。
+        </p>
+        <div class="cmd-table-wrap">
+          <table class="branch-table">
+            <caption class="sr-only">マージ方法の比較</caption>
+            <thead>
+              <tr><th>方法</th><th>特徴</th><th>おすすめ度</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Squash and merge</strong></td>
+                <td>ブランチのコミットを1つにまとめる。main履歴が「1機能＝1commit」で読みやすい</td>
+                <td>◎ 個人〜小規模チーム</td>
+              </tr>
+              <tr>
+                <td><strong>Merge commit</strong></td>
+                <td>コミットを全部残し、マージ用commitを足す。履歴は詳細だが煩雑になりがち</td>
+                <td>△</td>
+              </tr>
+              <tr>
+                <td><strong>Rebase and merge</strong></td>
+                <td>マージcommitなしの一直線な履歴。hashが書き換わる</td>
+                <td>○</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-info">
+          <strong>迷ったら Squash。</strong> 履歴の見やすさを優先します。チームで方式を1つに統一しておくと混乱しません。
+        </div>
+      </section>
+
+      <!-- ⑦ 後片付け -->
+      <section class="branch-section">
+        <h2 class="section-title">⑦ マージ後の後片付け</h2>
+        <p>マージしたら、役目を終えた作業ブランチを片付けて、次のサイクルに備えます。</p>
+        <div class="mini-terminal" aria-label="マージ後の後片付けコマンド例">git switch main
+git pull origin main         <span class="term-info"># マージ結果を取り込む</span>
+git branch -d feature/xxx    <span class="term-info"># ローカルの作業ブランチを削除</span></div>
+        <p class="muted small">
+          GitHub上のブランチも、PR画面の <strong>「Delete branch」</strong> ボタンで削除しておくとリポジトリが散らかりません。
+        </p>
+      </section>
+
+      <!-- ⑧ コンフリクト -->
+      <section class="branch-section">
+        <h2 class="section-title">⑧ コンフリクトが起きたら（落ち着いて）</h2>
+        <p>
+          同じ場所を2人が別々に変えていると、Gitは「どちらを残すか自動で決められない」状態になります。これがコンフリクトです。
+          慌てず、次の手順で解消します。
+        </p>
+        <ol class="reason-list">
+          <li><code>git pull origin main</code> を実行すると、衝突箇所が <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> のマーカーで表示される</li>
+          <li>どちらを残すか（または両方残すか）を手で決めて、マーカーを消す</li>
+          <li><code>git add</code> → <code>git commit</code> → <code>git push</code></li>
+          <li><strong>判断に迷うコードは勝手に解消せず、書いた本人に確認する</strong></li>
+        </ol>
+        <div class="callout callout-warn">
+          <strong>⚠ 一番危ないのは「とりあえず片方を消す」：</strong>
+          消してはいけない他人のコードを消す事故につながります。中身が分からないときは必ず確認を。
+        </div>
+      </section>
+
+      <!-- ⑨ やってはいけないこと -->
+      <section class="branch-section">
+        <h2 class="section-title">⑨ やってはいけないこと</h2>
+        <div class="callout callout-warn">
+          <ul style="margin:0; padding-left:1.2em;">
+            <li>❌ <strong>main に直接 commit / push しない</strong></li>
+            <li>❌ <strong>巨大なPRを作らない</strong> — レビュー不能・コンフリクトの温床。小さく分ける</li>
+            <li>❌ <strong>pullせずに作業を始めない</strong> — 古い <code>main</code> からの分岐は事故のもと</li>
+            <li>❌ <strong>コンフリクトを適当に解消しない</strong> — 消してはいけないコードを消す事故</li>
+            <li>❌ <strong>共有ブランチ（main等）で <code>git push --force</code> しない</strong></li>
+            <li>❌ <strong>他人のブランチに勝手に force push しない</strong></li>
+            <li>⚠ コミットメッセージを <code>fix</code> <code>update</code> だけで済ませない</li>
+            <li>⚠ レビューは「動くか」だけでなく「読めるか／後で直せるか」も見る</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ⑩ コミットメッセージ -->
+      <section class="branch-section">
+        <h2 class="section-title">⑩ コミットメッセージの目安（Conventional Commits）</h2>
+        <p>接頭辞で種類を示すと、履歴がぐっと読みやすくなります。</p>
+        <div class="cmd-table-wrap">
+          <table class="branch-table">
+            <caption class="sr-only">Conventional Commits の接頭辞</caption>
+            <thead>
+              <tr><th>接頭辞</th><th>意味</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>feat:</code></td><td>新機能</td></tr>
+              <tr><td><code>fix:</code></td><td>バグ修正</td></tr>
+              <tr><td><code>refactor:</code></td><td>動作を変えない内部改善</td></tr>
+              <tr><td><code>docs:</code></td><td>ドキュメント</td></tr>
+              <tr><td><code>style:</code></td><td>見た目・フォーマットのみ</td></tr>
+              <tr><td><code>test:</code></td><td>テスト追加・修正</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          例: <code>feat: タグバッジをサムネイルに重ねて表示</code><br />
+          ※「なぜそうしたか」が複雑なときは、本文（2行目以降）に書きます。
+        </p>
+      </section>
+
+      <!-- ⑪ チートシート＋導線 -->
+      <section class="branch-section">
+        <h2 class="section-title">⑪ よく使うコマンド（チートシート）</h2>
+        <div class="mini-terminal" aria-label="チーム開発でよく使うコマンド一覧">git status                     <span class="term-info"># 現在の状態を確認</span>
+git branch                     <span class="term-info"># ブランチ一覧</span>
+git switch -c feature/xxx      <span class="term-info"># ブランチ作成＆移動</span>
+git pull origin main           <span class="term-info"># mainを取り込む</span>
+git add . && git commit -m ""  <span class="term-info"># 変更を記録</span>
+git push origin feature/xxx    <span class="term-info"># リモートへ送る</span>
+git log --oneline -10          <span class="term-info"># 履歴を簡潔に表示</span>
+git stash                      <span class="term-info"># 作業を一時退避</span>
+git stash pop                  <span class="term-info"># 退避した作業を戻す</span></div>
+
+        <p class="branch-cta">
+          <a class="btn btn-primary" href="index.html#simulator">シミュレーターでコマンドを試す</a>
+          <a class="btn btn-ghost" href="branch.html">ブランチの基礎を学ぶ</a>
+          <a class="btn btn-ghost" href="index.html#commands">コマンドの詳細を見る</a>
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Git Visual Trainer — Gitの基本操作を“状態の変化”で学ぶ学習用サイト</p>
+      <p class="muted">本物のGitは動きません。すべて学習用の疑似デモです。</p>
+    </div>
+  </footer>
+
+  <!-- このページはSPAではないので、モバイルメニューの開閉だけ最小限のJSで対応 -->
+  <script>
+    (function () {
+      var toggle = document.getElementById("navToggle");
+      var nav = document.getElementById("primaryNav");
+      if (toggle && nav) {
+        toggle.addEventListener("click", function () {
+          var open = nav.classList.toggle("open");
+          toggle.setAttribute("aria-expanded", String(open));
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
