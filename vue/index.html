@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Vue.jsの予習ノート。リアクティブ、ref、ディレクティブ(v-bind/v-on/v-model/v-for/v-if)、最小の動くコード、Todoアプリの完成イメージまでをスマホで読める形で図解。" />
+  <title>Vue.js を学ぶ ｜ 学習ハブ</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <!-- ===== ヘッダー / ナビ（ハブと統一） ===== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text">学習ハブ</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav">
+        <span class="sr-only">メニューを開閉</span>
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+      </button>
+      <nav class="primary-nav" id="primaryNav" aria-label="メインメニュー">
+        <a class="nav-link nav-hub" href="../index.html">← 学習ハブ</a>
+        <a class="nav-link active" href="index.html" aria-current="page">Vue.js</a>
+        <a class="nav-link" href="vue-intro.md">ノート全文(md)</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" id="app" tabindex="-1">
+    <article class="view" style="display:block">
+
+      <h1 class="view-title">Vue.js を学ぶ</h1>
+      <p class="view-lead">
+        Vue.js の<strong>予習ノート</strong>です。手を動かす前に「言葉と全体像」だけ入れておくためのもの。
+        暗記は不要で、<strong>「リアクティブ」と「<code>v-for</code> / <code>v-model</code>」</strong>だけ頭の隅に残ればOK。
+        スマホでそのまま読める<a href="vue-intro.md">ノート全文(md)</a>も置いています。
+      </p>
+
+      <div class="callout callout-info">
+        <strong>読む目的：</strong>
+        あとで実際に Vue を触る前の地ならし。全体像を掴んでおくと、手を動かすときに迷いません。
+      </div>
+
+      <!-- ① Vueってなに -->
+      <section class="branch-section">
+        <h2 class="section-title">① Vue.js ってなに（3行で）</h2>
+        <ul class="reason-list">
+          <li><strong>画面（HTML）を、データに合わせて自動で書き換えてくれる JavaScript の道具</strong>。</li>
+          <li>素のJSは「ボタンが押された → 自分で文字を書き換える」を全部手書き。Vueは<strong>データを変えるだけで画面が勝手に追従</strong>する。</li>
+          <li>Webフロントでよく使う。React と並ぶ代表的な選択肢のひとつ。</li>
+        </ul>
+      </section>
+
+      <!-- ② リアクティブ -->
+      <section class="branch-section">
+        <h2 class="section-title">② 一番大事な考え方＝「リアクティブ」</h2>
+        <p>
+          Vue の肝はこれひとつ。<strong>値を変えると、その値を使っている画面が自動で更新される</strong>こと。
+          下の2つを見比べると違いが分かります。
+        </p>
+
+        <div class="compare-grid">
+          <div class="compare-card compare-feature">
+            <h3 class="compare-title">素のJS（手動で更新）</h3>
+            <div class="mini-terminal" aria-label="素のJavaScriptの例">let count = 0;
+button.onclick = () =&gt; {
+  count++;
+  <span class="term-info">// ↓ 画面の更新を自分で書く</span>
+  display.textContent = count;
+};</div>
+          </div>
+          <div class="compare-card compare-main">
+            <h3 class="compare-title">Vue（自動で更新）</h3>
+            <div class="mini-terminal" aria-label="Vueの例">const count = ref(0);
+<span class="term-info">// 値を変えるだけ。画面はVueが更新</span>
+const increment = () =&gt; {
+  count.value++;
+};</div>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <code>count</code> を1増やすと、画面の <code>{{ count }}</code> の部分が<strong>勝手に</strong>1増える。
+          この「自動で追従」が<strong>リアクティブ</strong>。
+        </div>
+      </section>
+
+      <!-- ③ 最小の動くコード -->
+      <section class="branch-section">
+        <h2 class="section-title">③ 最小の動くコード（読むだけでOK）</h2>
+        <p>ビルド環境なし。HTML に Vue を CDN で読み込むだけで動きます。</p>
+        <div class="mini-terminal" aria-label="Vueの最小コード例">&lt;div id="app"&gt;
+  &lt;p&gt;{{ message }}&lt;/p&gt;   <span class="term-info">&lt;!-- {{ }} はデータが入る窓 --&gt;</span>
+&lt;/div&gt;
+
+&lt;script src="https://unpkg.com/vue@3/dist/vue.global.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const { createApp, ref } = Vue
+
+  createApp({
+    setup() {
+      const message = ref('こんにちは Vue')  <span class="term-info">// ① リアクティブな値</span>
+      return { message }                     <span class="term-info">// ③ returnして初めて使える</span>
+    }
+  }).mount('#app')   <span class="term-info">// ④ id="app" の場所に差し込む</span>
+&lt;/script&gt;</div>
+
+        <div class="cmd-table-wrap">
+          <table class="branch-table">
+            <caption class="sr-only">最小コードの読み方</caption>
+            <thead>
+              <tr><th>書き方</th><th>意味</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>ref('...')</code></td><td>変わると画面が追従する値を作る。JS側で読み書きするときは <code>message.value</code></td></tr>
+              <tr><td><code>{{ message }}</code></td><td>HTML側にデータを表示する窓（マスタッシュ＝口ひげ）</td></tr>
+              <tr><td><code>return { ... }</code></td><td>ここに入れた値だけが HTML 側で使える</td></tr>
+              <tr><td><code>.mount('#app')</code></td><td>「この div を Vue が管理するよ」という宣言</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ④ ディレクティブ -->
+      <section class="branch-section">
+        <h2 class="section-title">④ ディレクティブ＝HTMLに付ける <code>v-○○</code></h2>
+        <p>
+          HTMLタグに <code>v-○○</code> という属性を付けて挙動を指定します。これを<strong>ディレクティブ</strong>と呼びます。
+          よく使う5つだけ覚えれば Todo は作れます。
+        </p>
+        <div class="cmd-table-wrap">
+          <table class="branch-table">
+            <caption class="sr-only">よく使うディレクティブ5つ</caption>
+            <thead>
+              <tr><th>書き方</th><th>何をする</th><th>短い例</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>v-bind:</code>（略 <code>:</code>）</td><td>属性にデータを流し込む</td><td><code>&lt;img :src="imgUrl"&gt;</code></td></tr>
+              <tr><td><code>v-on:</code>（略 <code>@</code>）</td><td>イベントを拾う</td><td><code>&lt;button @click="add"&gt;</code></td></tr>
+              <tr><td><code>v-model</code></td><td>入力欄とデータを双方向で繋ぐ</td><td><code>&lt;input v-model="text"&gt;</code></td></tr>
+              <tr><td><code>v-for</code></td><td>配列を繰り返し表示</td><td><code>&lt;li v-for="t in list"&gt;</code></td></tr>
+              <tr><td><code>v-if</code></td><td>条件で出す/消す</td><td><code>&lt;p v-if="done"&gt;完了&lt;/p&gt;</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-info">
+          ざっくり：<code>:</code> は「<strong>渡す</strong>」、<code>@</code> は「<strong>受け取る</strong>」。
+          <code>v-model</code> は「入力欄とデータが<strong>鏡みたいに同期</strong>」、
+          <code>v-for</code> は「<strong>リストを並べる</strong>」、<code>v-if</code> は「<strong>条件で出し分け</strong>」。
+        </div>
+      </section>
+
+      <!-- ⑤ Todo完成イメージ -->
+      <section class="branch-section">
+        <h2 class="section-title">⑤ Todoアプリの完成イメージ（読むだけ）</h2>
+        <p>「こういう形か」と眺めるだけでOK。④までの部品がぜんぶ入っています。</p>
+        <div class="mini-terminal" aria-label="Todoアプリのコード例">&lt;div id="app"&gt;
+  &lt;input v-model="newText" @keyup.enter="add" placeholder="やること" /&gt;
+  &lt;button @click="add"&gt;追加&lt;/button&gt;
+
+  &lt;ul&gt;
+    &lt;li v-for="(todo, i) in todos" :key="i"&gt;
+      &lt;input type="checkbox" v-model="todo.done" /&gt;
+      &lt;span :class="{ done: todo.done }"&gt;{{ todo.text }}&lt;/span&gt;
+      &lt;button @click="remove(i)"&gt;削除&lt;/button&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  const { createApp, ref } = Vue
+  createApp({
+    setup() {
+      const newText = ref('')
+      const todos = ref([])                  <span class="term-info">// 配列もリアクティブ</span>
+      const add = () =&gt; {
+        if (newText.value === '') return
+        todos.value.push({ text: newText.value, done: false })
+        newText.value = ''                   <span class="term-info">// 入力欄を空に戻す</span>
+      }
+      const remove = (i) =&gt; { todos.value.splice(i, 1) }
+      return { newText, todos, add, remove }
+    }
+  }).mount('#app')
+&lt;/script&gt;</div>
+
+        <ul class="reason-list">
+          <li><code>v-for="(todo, i) in todos"</code> … 配列を1件ずつ <code>todo</code> として並べる。<code>i</code> は番号（削除に使う）。</li>
+          <li><code>v-model="todo.done"</code> … チェックボックスと <code>done</code>(true/false)が同期。</li>
+          <li><code>:class="{ done: todo.done }"</code> … <code>done</code> が true のときだけ <code>done</code> クラスを付ける（打ち消し線など）。</li>
+          <li><code>todos.value.push(...)</code> … 配列に足すと <code>v-for</code> の表示も<strong>自動で増える</strong>（＝リアクティブ）。</li>
+        </ul>
+      </section>
+
+      <!-- ⑥ 面接で言えること -->
+      <section class="branch-section">
+        <h2 class="section-title">⑥ 面接で言えること（正直版・盛らない）</h2>
+        <ul class="reason-list">
+          <li>「説明会で Vue.js を使うと伺ったので、<strong>公式チュートリアルを触って、簡単な Todo アプリを作ってみました</strong>。」</li>
+          <li>「素のJSだと画面の更新を自分で書きますが、Vueは<strong>データを変えると画面が自動更新（リアクティブ）</strong>なのが新鮮でした。」</li>
+          <li>「<code>v-for</code> でリスト表示、<code>v-model</code> で入力との同期、といった基本を試した段階です。これから実務で深めたいです。」</li>
+        </ul>
+        <div class="callout callout-warn">
+          <strong>ポイント：</strong>「もう触った」事実 ＋ 正直に「基本の段階」と言う。背伸びしないのが一番効きます。
+        </div>
+      </section>
+
+      <!-- ⑦ 用語ミニ辞典 -->
+      <section class="branch-section">
+        <h2 class="section-title">⑦ 用語ミニ辞典</h2>
+        <div class="cmd-table-wrap">
+          <table class="branch-table">
+            <caption class="sr-only">Vueの用語ミニ辞典</caption>
+            <thead>
+              <tr><th>用語</th><th>ざっくり意味</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>リアクティブ</td><td>値を変えると画面が自動で追従すること。Vueの肝</td></tr>
+              <tr><td><code>ref</code></td><td>リアクティブな値を作る関数。JS側では <code>.value</code> で読み書き</td></tr>
+              <tr><td>マスタッシュ <code>{{ }}</code></td><td>HTMLにデータを表示する窓</td></tr>
+              <tr><td>ディレクティブ</td><td><code>v-○○</code> というHTMLの特殊属性（v-for, v-if など）</td></tr>
+              <tr><td>双方向バインディング</td><td><code>v-model</code> による「入力欄 ⇄ データ」の同期</td></tr>
+              <tr><td>コンポーネント</td><td>画面の部品を再利用できる単位（今回は深入りしない）</td></tr>
+              <tr><td>CDN</td><td>ネット経由でライブラリを読み込む仕組み。<code>&lt;script src&gt;</code> で書く</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ⑧ 次にやること -->
+      <section class="branch-section">
+        <h2 class="section-title">⑧ 次にやること（ハンズオン）</h2>
+        <p>このノートで「言葉」を入れたぶん、手を動かすのが速くなります。順番はこの通り。</p>
+        <ol class="reason-list">
+          <li>カウンター（<code>ref</code> と <code>@click</code>）</li>
+          <li>ディレクティブを1個ずつ</li>
+          <li>Todoアプリ（⑤を自分で書けるように）</li>
+          <li>面接トークメモを3行</li>
+        </ol>
+
+        <p class="branch-cta">
+          <a class="btn btn-primary" href="vue-intro.md">ノート全文(md)を読む</a>
+          <a class="btn btn-ghost" href="../index.html">← 学習ハブへ戻る</a>
+        </p>
+        <p class="muted small">
+          ※ このノートは予習用。暗記不要。「リアクティブ」と「<code>v-for</code> / <code>v-model</code>」だけ頭の隅に残ればOK。
+        </p>
+      </section>
+
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>学習ハブ — 日々の学びをジャンルごとにまとめる学習用サイト</p>
+      <p class="muted">Vue.js ジャンル：予習用ノート（手を動かす前の地ならし）。</p>
+    </div>
+  </footer>
+
+  <!-- モバイルメニューの開閉だけ最小限のJSで対応 -->
+  <script>
+    (function () {
+      var toggle = document.getElementById("navToggle");
+      var nav = document.getElementById("primaryNav");
+      if (toggle && nav) {
+        toggle.addEventListener("click", function () {
+          var open = nav.classList.toggle("open");
+          toggle.setAttribute("aria-expanded", String(open));
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
