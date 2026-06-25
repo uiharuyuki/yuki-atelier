@@ -3,64 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Gitの基本コマンドを「状態変化」として直感的に学べる学習サイト。作業フォルダ・ステージング・ローカルリポジトリ・GitHubの動きを目で見て理解できます。" />
-  <title>Git Visual Trainer ｜ Gitを“状態の変化”で学ぶ</title>
+  <meta name="description" content="日々の学習をジャンルごとにまとめる学習ハブ。スマホでもPCでも使える、自分専用の学習サイト。" />
+  <title>学習ハブ ｜ 日々の学びをまとめる</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <!-- ===== ヘッダー / ナビゲーション ===== -->
+  <!-- ===== ヘッダー ===== -->
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="#home" data-view="home">
-        <span class="brand-mark" aria-hidden="true">⎇</span>
-        <span class="brand-text">Git&nbsp;Visual&nbsp;Trainer</span>
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text">学習ハブ</span>
       </a>
-      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav">
-        <span class="sr-only">メニューを開閉</span>
-        <span class="nav-toggle-bar" aria-hidden="true"></span>
-      </button>
-      <nav class="primary-nav" id="primaryNav" aria-label="メインメニュー">
-        <button class="nav-link" data-view="home">ホーム</button>
-        <button class="nav-link" data-view="situations">状況から学ぶ</button>
-        <button class="nav-link" data-view="commands">コマンドから学ぶ</button>
-        <button class="nav-link" data-view="simulator">シミュレーター</button>
-        <button class="nav-link" data-view="quiz">クイズで復習</button>
-        <a class="nav-link" href="branch.html">ブランチを学ぶ</a>
-        <a class="nav-link" href="team.html">チーム開発</a>
+      <nav class="primary-nav" aria-label="メインメニュー">
+        <a class="nav-link active" href="index.html" aria-current="page">ホーム</a>
       </nav>
     </div>
   </header>
 
-  <main id="app" class="container" tabindex="-1">
-    <!-- 各ビューはJSで表示/非表示を切り替えます -->
+  <main class="container" id="app" tabindex="-1">
 
-    <!-- ===== ホーム ===== -->
-    <section class="view" id="view-home" aria-labelledby="home-title"></section>
+    <!-- ヒーロー -->
+    <section class="hero">
+      <h1 class="hero-title">学習ハブ</h1>
+      <p class="hero-lead">
+        日々学んだことを、ジャンルごとにまとめていく自分専用の学習サイトです。
+        各ジャンルは<strong>そのテーマに合った専用の解説・問題形式</strong>で作っていきます。
+        まずは下から、学びたいジャンルを選んでください。
+      </p>
+    </section>
 
-    <!-- ===== 状況から学ぶ ===== -->
-    <section class="view" id="view-situations" aria-labelledby="situations-title" hidden></section>
+    <!-- ジャンル一覧 -->
+    <section class="home-section">
+      <h2 class="section-title">ジャンルを選ぶ</h2>
+      <p class="section-lead">学びたい分野のカードをタップ。内容は日々増やしていきます。</p>
 
-    <!-- ===== コマンドから学ぶ ===== -->
-    <section class="view" id="view-commands" aria-labelledby="commands-title" hidden></section>
+      <div class="hub-grid">
 
-    <!-- ===== シミュレーター ===== -->
-    <section class="view" id="view-simulator" aria-labelledby="simulator-title" hidden></section>
+        <!-- Git（公開済み） -->
+        <a class="hub-card" href="git/index.html">
+          <span class="hub-icon" aria-hidden="true">⎇</span>
+          <span class="hub-card-body">
+            <span class="hub-card-title">Git / GitHub</span>
+            <span class="hub-card-desc">基本コマンドを“状態の変化”で学ぶ。シミュレーター・クイズ・ブランチ／チーム開発の解説つき。</span>
+          </span>
+          <span class="hub-badge hub-badge-ready">学習できる</span>
+        </a>
 
-    <!-- ===== クイズ ===== -->
-    <section class="view" id="view-quiz" aria-labelledby="quiz-title" hidden></section>
+        <!-- 今後追加するジャンルのプレースホルダー -->
+        <div class="hub-card hub-card-soon" aria-disabled="true">
+          <span class="hub-icon" aria-hidden="true">＋</span>
+          <span class="hub-card-body">
+            <span class="hub-card-title">次のジャンル</span>
+            <span class="hub-card-desc">学びたい分野ができたら、ここに新しいジャンルを追加していきます。</span>
+          </span>
+          <span class="hub-badge hub-badge-soon">準備中</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- このサイトについて -->
+    <section class="home-section">
+      <h2 class="section-title">このサイトの考え方</h2>
+      <div class="hub-about">
+        <div class="hub-about-item">
+          <span class="hub-about-icon" aria-hidden="true">📱</span>
+          <div>
+            <strong>スマホ優先・PCでも快適</strong>
+            <p class="muted">スマホでの読みやすさを基準に作り、広い画面では自動で見やすく広がります。</p>
+          </div>
+        </div>
+        <div class="hub-about-item">
+          <span class="hub-about-icon" aria-hidden="true">🧩</span>
+          <div>
+            <strong>ジャンルごとに専用の作り</strong>
+            <p class="muted">解説の見た目（デザイン）は全ジャンル共通。問題形式や画面はテーマに合わせて専用化します。</p>
+          </div>
+        </div>
+        <div class="hub-about-item">
+          <span class="hub-about-icon" aria-hidden="true">🌱</span>
+          <div>
+            <strong>少しずつ増やす</strong>
+            <p class="muted">完璧を目指さず、学んだその日に項目を足していけるシンプルな構成です。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p>Git Visual Trainer — Gitの基本操作を“状態の変化”で学ぶ学習用サイト</p>
-      <p class="muted">本物のGitは動きません。すべて学習用の疑似デモです。</p>
+      <p>学習ハブ — 日々の学びをジャンルごとにまとめる学習用サイト</p>
+      <p class="muted">各ジャンルの中身は学習用の教材です。</p>
     </div>
   </footer>
-
-  <!-- データ → 各機能 → UI制御 の順に読み込みます -->
-  <script src="js/lessons.js"></script>
-  <script src="js/simulator.js"></script>
-  <script src="js/quiz.js"></script>
-  <script src="js/app.js"></script>
 </body>
 </html>
