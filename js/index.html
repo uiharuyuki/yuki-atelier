@@ -98,8 +98,8 @@
         <div class="mini-terminal" aria-label="letとconstの違い">let count = 0;       <span class="term-info">// あとで書き換えOK</span>
 const name = '太郎';  <span class="term-info">// 書き換え禁止（定数）</span>
 
-count = 1;    <span class="term-info">// ✅ OK</span>
-name = '次郎'; <span class="term-info">// ❌ エラー（constは再代入できない）</span></div>
+count = 1;    <span class="term-info">// <svg class="ui-icon ui-icon-inline ok" aria-hidden="true"><use href="../assets/icons/ui-icons.svg#ic-check"/></svg> OK</span>
+name = '次郎'; <span class="term-info">// <svg class="ui-icon ui-icon-inline ng" aria-hidden="true"><use href="../assets/icons/ui-icons.svg#ic-x"/></svg> エラー（constは再代入できない）</span></div>
         <div class="callout callout-info">
           <strong>迷ったらまず <code>const</code>。</strong>「これは変える」と分かってから <code>let</code> に。
           Vueのコードもほぼ <code>const</code> です。
@@ -342,12 +342,12 @@ const { name, age } = person; <span class="term-info">// name='太郎', age=20</
           <li><code>const { createApp, ref } = Vue</code> … 段階8の<strong>分割代入</strong>。2つの道具を取り出す。</li>
           <li><code>createApp({ ... })</code> … <strong>アプリを1つ作る</strong>。中の <code>{ }</code> は「設定一式」のオブジェクト。</li>
           <li><code>setup() { ... }</code> … 起動時に呼ばれる関数。<strong>使うデータと処理を準備する場所</strong>。</li>
-          <li>★<code>const message = ref('こんにちは Vue')</code> … <strong><code>ref</code>＝変わると画面が追従する値</strong>を作る。</li>
+          <li><svg class="ui-icon ui-icon-inline accent" aria-hidden="true"><use href="../assets/icons/ui-icons.svg#ic-star"/></svg> <code>const message = ref('こんにちは Vue')</code> … <strong><code>ref</code>＝変わると画面が追従する値</strong>を作る。</li>
           <li><code>return { message }</code> … <strong>return した値だけ</strong>がHTMLの <code>{{ }}</code> で使える（返し忘れ注意）。</li>
           <li><code>.mount('#app')</code> … 作ったアプリを <code>id="app"</code> の場所に<strong>取り付ける</strong>（<code>#</code>＝idが〜）。</li>
         </ul>
         <div class="callout callout-info">
-          ★Vue新出②：<code>ref</code> の値を<strong>JS側で読み書きするときは <code>.value</code></strong> を付ける（<code>{{ }}</code>内では不要）。
+          <svg class="ui-icon ui-icon-inline accent" aria-hidden="true"><use href="../assets/icons/ui-icons.svg#ic-star"/></svg> Vue新出②：<code>ref</code> の値を<strong>JS側で読み書きするときは <code>.value</code></strong> を付ける（<code>{{ }}</code>内では不要）。
           <div class="mini-terminal" aria-label="value の例" style="margin-top:10px">const count = ref(0);
 count.value;   <span class="term-info">// 0（読む）</span>
 count.value++; <span class="term-info">// 1（書く）</span></div>

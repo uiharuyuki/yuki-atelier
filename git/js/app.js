@@ -46,6 +46,21 @@
     });
   }
 
+  // SVG スプライトからアイコン要素を作る
+  // 例: svgIcon("ic-warn", "ui-icon-inline")
+  function svgIcon(name, extraClass) {
+    var svgNS = "http://www.w3.org/2000/svg";
+    var xlinkNS = "http://www.w3.org/1999/xlink";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("class", "ui-icon" + (extraClass ? " " + extraClass : ""));
+    svg.setAttribute("aria-hidden", "true");
+    var use = document.createElementNS(svgNS, "use");
+    use.setAttributeNS(xlinkNS, "xlink:href", "../assets/icons/ui-icons.svg#" + name);
+    use.setAttribute("href", "../assets/icons/ui-icons.svg#" + name);
+    svg.appendChild(use);
+    return svg;
+  }
+
   /* ===================================================================
    * 共通部品: 4つの状態エリアを描画する
    * stateオブジェクト（SIM.getState()の戻り値）を受け取り、
@@ -121,7 +136,7 @@
 
   function fileCard(name, label, kind) {
     return el("div", { class: "card file-card kind-" + kind }, [
-      el("span", { class: "card-icon", "aria-hidden": "true", text: "📄" }),
+      el("span", { class: "card-icon", "aria-hidden": "true" }, [svgIcon("ic-page")]),
       el("span", { class: "card-name", text: name }),
       el("span", { class: "card-tag", text: label })
     ]);
@@ -129,7 +144,7 @@
 
   function commitCard(id, message, incoming) {
     return el("div", { class: "card commit-card" + (incoming ? " incoming" : "") }, [
-      el("span", { class: "card-icon", "aria-hidden": "true", text: "⬤" }),
+      el("span", { class: "card-icon", "aria-hidden": "true" }, [svgIcon("ic-dot")]),
       el("span", { class: "commit-id", text: id }),
       el("span", { class: "card-name", text: message })
     ]);
@@ -167,12 +182,12 @@
     // 3つの入口の説明
     var cards = el("div", { class: "entry-grid" });
     [
-      { v: "situations", icon: "🧭", t: "状況から学ぶ", d: "「変更を保存したい」など“やりたいこと”から、使うコマンドと状態変化を学びます。" },
-      { v: "commands", icon: "📘", t: "コマンドから学ぶ", d: "各コマンドの意味・使う場面・注意点・よくある勘違いを確認し、デモで動きを見ます。" },
-      { v: "quiz", icon: "📝", t: "クイズで復習", d: "選択式クイズで理解度を確認。間違えた問題は自動で復習リストに保存されます。" }
+      { v: "situations", icon: "ic-compass", t: "状況から学ぶ", d: "「変更を保存したい」など“やりたいこと”から、使うコマンドと状態変化を学びます。" },
+      { v: "commands", icon: "ic-book", t: "コマンドから学ぶ", d: "各コマンドの意味・使う場面・注意点・よくある勘違いを確認し、デモで動きを見ます。" },
+      { v: "quiz", icon: "ic-memo", t: "クイズで復習", d: "選択式クイズで理解度を確認。間違えた問題は自動で復習リストに保存されます。" }
     ].forEach(function (e) {
       cards.appendChild(el("button", { class: "entry-card", "data-view": e.v }, [
-        el("span", { class: "entry-icon", "aria-hidden": "true", text: e.icon }),
+        el("span", { class: "entry-icon", "aria-hidden": "true" }, [svgIcon(e.icon)]),
         el("h2", { class: "entry-title", text: e.t }),
         el("p", { class: "entry-desc", text: e.d })
       ]));
@@ -183,7 +198,7 @@
 
     // ブランチ解説ページへの導線（別ページ branch.html）
     view.appendChild(el("a", { class: "branch-banner", href: "branch.html" }, [
-      el("span", { class: "branch-banner-icon", "aria-hidden": "true", text: "🌿" }),
+      el("span", { class: "branch-banner-icon", "aria-hidden": "true" }, [svgIcon("ic-leaf")]),
       el("span", {}, [
         el("strong", { text: "ブランチを学ぶ（解説ページ）" }),
         el("span", { class: "branch-banner-sub", text: "main と作業ブランチの違い・分岐と合流のしくみを図解で確認できます。" })
@@ -238,7 +253,7 @@
       grid.appendChild(el("button", {
         class: "situation-card", "data-sit": sit.id, "aria-haspopup": "true"
       }, [
-        el("span", { class: "situation-icon", "aria-hidden": "true", text: sit.icon }),
+        el("span", { class: "situation-icon", "aria-hidden": "true" }, [svgIcon(sit.icon)]),
         el("span", { class: "situation-title", text: sit.title }),
         el("span", { class: "situation-desc", text: sit.desc })
       ]));
@@ -262,7 +277,8 @@
 
     panel.appendChild(el("div", { class: "detail-card" }, [
       el("h2", { class: "detail-title" }, [
-        el("span", { "aria-hidden": "true", text: sit.icon + " " }), sit.title
+        el("span", { class: "detail-title-icon", "aria-hidden": "true" }, [svgIcon(sit.icon)]),
+        " ", sit.title
       ]),
       labeledBlock("使うコマンド", cmdList),
       labeledBlock("なぜ？", el("p", { text: sit.reason })),
@@ -315,7 +331,7 @@
         el("code", { class: "command-name", text: cmd.name }),
         el("span", { class: "command-area", text: cmd.area }),
         el("p", { class: "command-meaning", text: cmd.meaning }),
-        isLearned ? el("span", { class: "learned-badge", text: "学習済み ✓" }) : null
+        isLearned ? el("span", { class: "learned-badge" }, [svgIcon("ic-check"), "学習済み"]) : null
       ]));
     });
     view.appendChild(grid);
@@ -334,7 +350,7 @@
       labeledBlock("ひとことで言うと", el("p", { text: cmd.meaning })),
       labeledBlock("使う場面", el("p", { text: cmd.when })),
       labeledBlock("注意点", el("p", { text: cmd.caution })),
-      labeledBlock("⚠ よくある勘違い", el("p", { class: "myth", text: cmd.myth })),
+      labeledBlock("よくある勘違い", el("p", { class: "myth", text: cmd.myth }), "ic-warn"),
       el("button", { class: "btn btn-primary", onClick: function () { runCommandDemo(cmd); } }, ["このコマンドのデモを見る"]),
       el("div", { id: "command-demo", class: "demo-stage" })
     ]));
@@ -381,14 +397,17 @@
     cards.forEach(function (card) {
       var id = card.getAttribute("data-cmd");
       if (learned.indexOf(id) !== -1 && !card.querySelector(".learned-badge")) {
-        card.appendChild(el("span", { class: "learned-badge", text: "学習済み ✓" }));
+        card.appendChild(el("span", { class: "learned-badge" }, [svgIcon("ic-check"), "学習済み"]));
       }
     });
   }
 
-  function labeledBlock(label, contentNode) {
+  function labeledBlock(label, contentNode, iconName) {
+    var labelChildren = iconName
+      ? [svgIcon(iconName, "ui-icon-inline"), " " + label]
+      : [label];
     return el("div", { class: "detail-block" }, [
-      el("h3", { class: "detail-label", text: label }),
+      el("h3", { class: "detail-label" }, labelChildren),
       contentNode
     ]);
   }

@@ -176,7 +176,7 @@ window.GVT_DATA = {
   SITUATIONS: [
     {
       id: "sit-changed",
-      icon: "✏️",
+      icon: "ic-pencil",
       title: "ファイルを変更した",
       desc: "編集したけど、今どうなってるか分からない。",
       commands: ["git status", "git diff"],
@@ -186,7 +186,7 @@ window.GVT_DATA = {
     },
     {
       id: "sit-save",
-      icon: "💾",
+      icon: "ic-disk",
       title: "変更を保存したい",
       desc: "区切りが良いので記録に残したい。",
       commands: ["git add .", 'git commit -m "メッセージ"'],
@@ -196,7 +196,7 @@ window.GVT_DATA = {
     },
     {
       id: "sit-upload",
-      icon: "🚀",
+      icon: "ic-rocket",
       title: "GitHubにアップしたい",
       desc: "手元の記録を共有・バックアップしたい。",
       commands: ["git push"],
@@ -206,7 +206,7 @@ window.GVT_DATA = {
     },
     {
       id: "sit-download",
-      icon: "📥",
+      icon: "ic-inbox",
       title: "GitHubの変更を取り込みたい",
       desc: "他の人の更新を手元に反映したい。",
       commands: ["git pull"],
@@ -216,7 +216,7 @@ window.GVT_DATA = {
     },
     {
       id: "sit-unadd",
-      icon: "↩️",
+      icon: "ic-undo",
       title: "間違えてaddした",
       desc: "コミット対象に余計なファイルを入れてしまった。",
       commands: ["git restore --staged ファイル名"],
@@ -226,7 +226,7 @@ window.GVT_DATA = {
     },
     {
       id: "sit-undo",
-      icon: "🧹",
+      icon: "ic-broom",
       title: "作業を取り消したい",
       desc: "編集をやめて、元の状態に戻したい。",
       commands: ["git restore ファイル名"],
@@ -236,7 +236,7 @@ window.GVT_DATA = {
     },
     {
       id: "sit-branch",
-      icon: "🌿",
+      icon: "ic-leaf",
       title: "ブランチを作りたい",
       desc: "今の状態を保ったまま、別の試作を始めたい。",
       commands: ["git switch -c ブランチ名"],
