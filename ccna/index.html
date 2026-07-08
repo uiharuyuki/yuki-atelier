@@ -19,10 +19,16 @@
     .ccna-lesson { border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-bottom: 22px; background: var(--paper); box-shadow: var(--shadow); }
     .ccna-lesson h3 { margin-top: 0; color: var(--ink-strong); border-bottom: 2px solid var(--accent); padding-bottom: 6px; }
     .ccna-lesson h4 { margin-top: 22px; color: var(--ink-strong); }
-    .ccna-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: .95rem; }
+    .table-scroll { margin: 12px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .ccna-table { width: 100%; border-collapse: collapse; margin: 0; font-size: .95rem; }
     .ccna-table th, .ccna-table td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
     .ccna-table th { background: var(--paper-deep); color: var(--ink-strong); font-weight: 600; }
     .ccna-table tr:nth-child(even) td { background: var(--paper-deep); }
+    /* スマホ: 列が潰れて汚く折り返すのを防ぎ、横スクロールで読ませる */
+    @media (max-width: 600px) {
+      .ccna-table { min-width: 34rem; font-size: .9rem; }
+      .ccna-table th, .ccna-table td { padding: 7px 9px; }
+    }
     .ccna-callout { border-left: 4px solid var(--accent); background: var(--paper-deep); padding: 10px 14px; margin: 12px 0; border-radius: 6px; font-size: .93rem; }
     .ccna-callout strong { color: var(--ink-strong); }
 
@@ -99,7 +105,7 @@
         <h4>1. OSI参照モデル（7層）</h4>
         <p>ネットワークの通信を、<strong>役割ごとに7つの層に分けた設計モデル</strong>。ISO（国際標準化機構）が作った理論モデルです。実際の通信は次の TCP/IP モデルで動いていますが、<strong>トラブル切り分けと概念整理は OSI で話す</strong>のが業界標準です。</p>
 
-        <table class="ccna-table">
+        <div class="table-scroll"><table class="ccna-table">
           <thead>
             <tr><th>層</th><th>名前</th><th>役割</th><th>代表例</th></tr>
           </thead>
@@ -112,7 +118,7 @@
             <tr><td>L2</td><td>データリンク層</td><td>同一セグメント内のフレーム転送</td><td><strong>Ethernet, MAC, スイッチ</strong></td></tr>
             <tr><td>L1</td><td>物理層</td><td>電気・光信号、ケーブル</td><td>UTP, 光ファイバ, ハブ</td></tr>
           </tbody>
-        </table>
+        </table></div>
 
         <div class="ccna-callout">
           <strong>豆知識:</strong> <strong>ISO</strong> は組織（国際標準化機構）、<strong>OSI</strong> は ISO が作った通信モデルの名前。略称の「ISO」はギリシャ語の <em>isos</em>（等しい）から取っているので、どの言語でも ISO で統一されています。
@@ -121,7 +127,7 @@
         <h4>2. TCP/IP モデル（4層）</h4>
         <p>実際のインターネットで動いているモデル。OSI の 7層を <strong>実装ベースで 4層に圧縮</strong>したものです。</p>
 
-        <table class="ccna-table">
+        <div class="table-scroll"><table class="ccna-table">
           <thead>
             <tr><th>TCP/IP層</th><th>対応するOSI</th><th>代表プロトコル</th></tr>
           </thead>
@@ -131,7 +137,7 @@
             <tr><td>インターネット層</td><td>L3</td><td>IP, ICMP, ARP</td></tr>
             <tr><td>ネットワークインターフェース層</td><td>L1〜L2</td><td>Ethernet, Wi-Fi</td></tr>
           </tbody>
-        </table>
+        </table></div>
 
         <div class="ccna-callout">
           CCNA 試験では <strong>OSI の層番号で問われる</strong>ことが多いです。まず OSI を体に入れて、TCP/IP は「実装側の呼び方」として押さえておけば OK。
@@ -140,7 +146,7 @@
         <h4>3. カプセル化とPDU（重要）</h4>
         <p>データが送信側で <strong>各層を下るとき、ヘッダが付き</strong>ます。受信側では上に行くとき <strong>ヘッダが剥がれます</strong>。データの単位（PDU: Protocol Data Unit）は層で呼び方が変わります:</p>
 
-        <table class="ccna-table">
+        <div class="table-scroll"><table class="ccna-table">
           <thead>
             <tr><th>層</th><th>PDU名</th></tr>
           </thead>
@@ -150,7 +156,7 @@
             <tr><td>L2 データリンク層</td><td>フレーム</td></tr>
             <tr><td>L1 物理層</td><td>ビット</td></tr>
           </tbody>
-        </table>
+        </table></div>
 
         <div class="ccna-callout">
           「L3の PDU は？」→ パケット、みたいに<strong>層番号と PDU 名を紐付けて即答できる</strong>ようにしておくと点が取れます。

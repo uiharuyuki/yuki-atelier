@@ -163,7 +163,6 @@
   function renderHome() {
     var view = $("#view-home");
     view.innerHTML = "";
-    var s = QUIZ.getSummary();
 
     view.appendChild(el("div", { class: "hero" }, [
       el("h1", { id: "home-title", class: "hero-title", text: "Gitを“暗記”ではなく“状態の変化”で学ぶ" }),
@@ -175,9 +174,6 @@
         navButton("クイズで復習", "quiz")
       ])
     ]));
-
-    // 進捗サマリー
-    view.appendChild(progressPanel(s));
 
     // 3つの入口の説明
     var cards = el("div", { class: "entry-grid" });
@@ -219,24 +215,6 @@
       class: "btn " + (variant === "primary" ? "btn-primary" : "btn-ghost"),
       "data-view": view, text: label
     });
-  }
-
-  function progressPanel(s) {
-    function stat(num, label) {
-      return el("div", { class: "stat" }, [
-        el("span", { class: "stat-num", text: String(num) }),
-        el("span", { class: "stat-label", text: label })
-      ]);
-    }
-    return el("section", { class: "progress-panel", "aria-label": "学習の進捗" }, [
-      el("h2", { class: "section-title", text: "あなたの進捗" }),
-      el("div", { class: "stat-row" }, [
-        stat(s.learnedCount + " / " + s.totalCommands, "学習済みコマンド"),
-        stat(s.correctRate + "%", "クイズ正答率"),
-        stat(s.reviewCount, "復習が必要")
-      ]),
-      el("p", { class: "muted small", text: "進捗はこのブラウザ（localStorage）に保存されます。" })
-    ]);
   }
 
   /* ===================================================================
@@ -509,7 +487,6 @@
     view.appendChild(el("p", { class: "view-lead", text: "選択式のクイズで理解度をチェック。間違えた問題は自動で復習リストに保存され、あとからまとめて解き直せます。" }));
 
     var s = QUIZ.getSummary();
-    view.appendChild(progressPanel(s));
 
     view.appendChild(el("div", { class: "quiz-mode-row" }, [
       el("button", { class: "btn btn-primary", onClick: function () { startQuiz("all"); } }, ["全問にチャレンジ"]),
@@ -596,17 +573,6 @@
         el("button", { class: "btn btn-ghost", onClick: function () { renderQuiz(); } }, ["クイズトップへ"])
       ])
     ]));
-    // 進捗パネルを最新化するためトップも更新
-    refreshProgressPanels();
-  }
-
-  // 画面内のすべての進捗パネルを更新（ホーム/クイズ共通）
-  function refreshProgressPanels() {
-    var s = QUIZ.getSummary();
-    document.querySelectorAll(".progress-panel").forEach(function (panel) {
-      var fresh = progressPanel(s);
-      panel.replaceWith(fresh);
-    });
   }
 
   /* ===================================================================
