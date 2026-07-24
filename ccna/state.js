@@ -3,6 +3,14 @@ const CCNAQuizState = (() => {
 
   const ALLOWED_RESULTS = new Set(["correct", "wrong"]);
 
+  function acquire(windowObject) {
+    try {
+      return windowObject.localStorage;
+    } catch (_) {
+      return null;
+    }
+  }
+
   function load(storage, key, questions) {
     try {
       const parsed = JSON.parse(storage.getItem(key) || "{}");
@@ -28,5 +36,5 @@ const CCNAQuizState = (() => {
     }
   }
 
-  return { load, save };
+  return { acquire, load, save };
 })();

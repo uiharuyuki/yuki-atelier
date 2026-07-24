@@ -54,13 +54,18 @@ class CcnaQuestionBankTests(unittest.TestCase):
     def test_app_supports_answer_explanations_and_review_filter(self):
         self.assertTrue(APP_JS.is_file())
         app = APP_JS.read_text(encoding="utf-8")
-        self.assertIn("localStorage", app)
+        self.assertIn("CCNAQuizState.acquire(window)", app)
+        self.assertIn("CCNAQuizState.save(storage", app)
         self.assertIn("review-filter", app)
         self.assertIn("explanation", app)
         self.assertIn("last-answer", app)
         self.assertIn("【正解】", app)
         self.assertIn("reviewOnly && correct", app)
-        self.assertIn("questions.js", CCNA_HTML.read_text(encoding="utf-8"))
+        self.assertIn("lastAnswer.focus()", app)
+        html = CCNA_HTML.read_text(encoding="utf-8")
+        self.assertIn('role="status"', html)
+        self.assertIn('tabindex="-1"', html)
+        self.assertIn("questions.js", html)
 
     def test_storage_failures_and_malformed_progress_are_safe(self):
         self.assertTrue(STATE_JS.is_file())
@@ -73,6 +78,10 @@ const context = {};
 vm.createContext(context);
 vm.runInContext(questionsCode + '\nthis.questions = CCNA_QUESTIONS;', context);
 vm.runInContext(stateCode + '\nthis.stateApi = CCNAQuizState;', context);
+
+const blockedWindow = {};
+Object.defineProperty(blockedWindow, 'localStorage', {get() { throw new Error('blocked getter'); }});
+if (context.stateApi.acquire(blockedWindow) !== null) process.exit(1);
 
 const throwingStorage = {
   getItem() { throw new Error('blocked'); },

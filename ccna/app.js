@@ -11,11 +11,12 @@
 
   if (!list || !progress || !filterButton || !resetButton || !emptyState || !lastAnswer) return;
 
-  const saved = CCNAQuizState.load(window.localStorage, STORAGE_KEY, CCNA_QUESTIONS);
+  const storage = CCNAQuizState.acquire(window);
+  const saved = CCNAQuizState.load(storage, STORAGE_KEY, CCNA_QUESTIONS);
   let reviewOnly = false;
 
   function saveProgress() {
-    return CCNAQuizState.save(window.localStorage, STORAGE_KEY, saved);
+    return CCNAQuizState.save(storage, STORAGE_KEY, saved);
   }
 
   function visibleQuestions() {
@@ -36,6 +37,8 @@
   }
 
   function showLastAnswer(question, storageSaved) {
+    lastAnswer.hidden = false;
+    lastAnswer.replaceChildren();
     const title = document.createElement("strong");
     title.textContent = "正解して要復習から外れました";
     const answer = document.createElement("p");
@@ -48,7 +51,7 @@
       warning.textContent = "この端末では進捗を保存できません。画面を閉じると結果が消える場合があります。";
       lastAnswer.appendChild(warning);
     }
-    lastAnswer.hidden = false;
+    lastAnswer.focus();
   }
 
   function answerQuestion(question, selectedIndex, card) {
@@ -88,8 +91,8 @@
     updateProgress();
 
     if (reviewOnly && correct) {
-      showLastAnswer(question, storageSaved);
       render();
+      showLastAnswer(question, storageSaved);
     }
   }
 
