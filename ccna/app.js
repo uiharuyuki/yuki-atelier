@@ -7,23 +7,15 @@
   const filterButton = document.getElementById("review-filter");
   const resetButton = document.getElementById("progress-reset");
   const emptyState = document.getElementById("review-empty");
+  const lastAnswer = document.getElementById("last-answer");
 
-  if (!list || !progress || !filterButton || !resetButton || !emptyState) return;
+  if (!list || !progress || !filterButton || !resetButton || !emptyState || !lastAnswer) return;
 
-  const saved = loadProgress();
+  const saved = CCNAQuizState.load(window.localStorage, STORAGE_KEY, CCNA_QUESTIONS);
   let reviewOnly = false;
 
-  function loadProgress() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      return parsed && typeof parsed === "object" ? parsed : {};
-    } catch (_) {
-      return {};
-    }
-  }
-
   function saveProgress() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    return CCNAQuizState.save(window.localStorage, STORAGE_KEY, saved);
   }
 
   function visibleQuestions() {
@@ -38,6 +30,27 @@
     progress.textContent = `${CCNA_QUESTIONS.length}問中 ${answered}問回答・${correct}問正解・要復習${review}問`;
   }
 
+  function clearLastAnswer() {
+    lastAnswer.replaceChildren();
+    lastAnswer.hidden = true;
+  }
+
+  function showLastAnswer(question, storageSaved) {
+    const title = document.createElement("strong");
+    title.textContent = "正解して要復習から外れました";
+    const answer = document.createElement("p");
+    answer.textContent = `正解: ${question.choices[question.answer]}`;
+    const explanation = document.createElement("p");
+    explanation.textContent = question.explanation;
+    lastAnswer.replaceChildren(title, answer, explanation);
+    if (!storageSaved) {
+      const warning = document.createElement("p");
+      warning.textContent = "この端末では進捗を保存できません。画面を閉じると結果が消える場合があります。";
+      lastAnswer.appendChild(warning);
+    }
+    lastAnswer.hidden = false;
+  }
+
   function answerQuestion(question, selectedIndex, card) {
     if (card.dataset.answered === "true") return;
     card.dataset.answered = "true";
@@ -46,19 +59,38 @@
     const explanation = card.querySelector(".quiz-explanation");
     const result = card.querySelector(".quiz-result");
     const correct = selectedIndex === question.answer;
+    const correctChoice = question.choices[question.answer];
 
     buttons.forEach((button, index) => {
       button.disabled = true;
-      if (index === question.answer) button.classList.add("correct");
-      if (index === selectedIndex && !correct) button.classList.add("wrong");
+      if (index === question.answer) {
+        button.classList.add("correct");
+        button.textContent = `${question.choices[index]}　【正解】`;
+        button.setAttribute("aria-label", `${question.choices[index]}、正解`);
+      }
+      if (index === selectedIndex && !correct) {
+        button.classList.add("wrong");
+        button.textContent = `${question.choices[index]}　【選択した回答】`;
+        button.setAttribute("aria-label", `${question.choices[index]}、選択した不正解の回答`);
+      }
     });
 
     saved[question.id] = correct ? "correct" : "wrong";
-    saveProgress();
-    result.textContent = correct ? "正解" : "不正解。正解を確認して、あとで要復習から解き直そう。";
+    const storageSaved = saveProgress();
+    result.textContent = correct
+      ? `正解: ${correctChoice}`
+      : `不正解。正解は「${correctChoice}」。あとで要復習から解き直そう。`;
+    if (!storageSaved) {
+      result.textContent += " この端末では進捗を保存できません。";
+    }
     result.className = `quiz-result ${correct ? "is-correct" : "is-wrong"}`;
     explanation.hidden = false;
     updateProgress();
+
+    if (reviewOnly && correct) {
+      showLastAnswer(question, storageSaved);
+      render();
+    }
   }
 
   function buildCard(question, displayIndex) {
@@ -113,6 +145,7 @@
 
   filterButton.addEventListener("click", () => {
     reviewOnly = !reviewOnly;
+    clearLastAnswer();
     render();
   });
 
@@ -120,6 +153,7 @@
     Object.keys(saved).forEach((key) => delete saved[key]);
     saveProgress();
     reviewOnly = false;
+    clearLastAnswer();
     render();
   });
 
