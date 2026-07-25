@@ -15,6 +15,36 @@
   const saved = CCNAQuizState.load(storage, STORAGE_KEY, CCNA_QUESTIONS);
   let reviewOnly = false;
 
+  function randomInt(max) {
+    if (max <= 1) return 0;
+    try {
+      if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+        const limit = 0x100000000 - (0x100000000 % max);
+        const buffer = new Uint32Array(1);
+        do {
+          window.crypto.getRandomValues(buffer);
+        } while (buffer[0] >= limit);
+        return buffer[0] % max;
+      }
+    } catch (_) {
+      // Fall back to Math.random when secure randomness is unavailable.
+    }
+    return Math.floor(Math.random() * max);
+  }
+
+  function shuffledQuestion(question) {
+    const choices = question.choices.map((text, index) => ({ text, index }));
+    for (let index = choices.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomInt(index + 1);
+      [choices[index], choices[swapIndex]] = [choices[swapIndex], choices[index]];
+    }
+    return {
+      ...question,
+      choices: choices.map((choice) => choice.text),
+      answer: choices.findIndex((choice) => choice.index === question.answer),
+    };
+  }
+
   function saveProgress() {
     return CCNAQuizState.save(storage, STORAGE_KEY, saved);
   }
@@ -138,7 +168,7 @@
   }
 
   function render() {
-    const questions = visibleQuestions();
+    const questions = visibleQuestions().map(shuffledQuestion);
     list.replaceChildren(...questions.map(buildCard));
     emptyState.hidden = questions.length !== 0;
     filterButton.textContent = reviewOnly ? "全問を表示" : "要復習だけ表示";

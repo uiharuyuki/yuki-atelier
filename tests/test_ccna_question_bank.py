@@ -37,7 +37,7 @@ class CcnaQuestionBankTests(unittest.TestCase):
             text=True,
         )
         questions = json.loads(result.stdout)
-        self.assertGreaterEqual(len(questions), 5)
+        self.assertEqual(len(questions), 9)
         ids = set()
         for question in questions:
             self.assertEqual(question["session"], "2026-07-25")
@@ -59,6 +59,9 @@ class CcnaQuestionBankTests(unittest.TestCase):
         self.assertIn("review-filter", app)
         self.assertIn("explanation", app)
         self.assertIn("last-answer", app)
+        self.assertIn("shuffledQuestion", app)
+        self.assertIn("getRandomValues", app)
+        self.assertIn("choices.findIndex", app)
         self.assertIn("【正解】", app)
         self.assertIn("reviewOnly && correct", app)
         self.assertIn("lastAnswer.focus()", app)
