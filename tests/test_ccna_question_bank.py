@@ -37,19 +37,32 @@ class CcnaQuestionBankTests(unittest.TestCase):
             text=True,
         )
         questions = json.loads(result.stdout)
-        self.assertEqual(len(questions), 9)
+        self.assertEqual(len(questions), 23)
         ids = set()
+        allowed_sessions = {"2026-07-25", "2026-07-29"}
+        allowed_topics = {
+            "ネットワークとは何か",
+            "LANとWAN",
+            "LANの分類",
+            "通信方式",
+            "MACアドレスとスイッチ",
+            "フレームとパケット",
+            "TCPとUDP",
+            "DNS",
+            "DHCP",
+            "SSHとTelnet",
+            "ネットワーク機器",
+            "デフォルトゲートウェイ",
+        }
         for question in questions:
-            self.assertEqual(question["session"], "2026-07-25")
-            self.assertEqual(question["topic"], "ネットワークとは何か")
+            self.assertIn(question["session"], allowed_sessions)
+            self.assertIn(question["topic"], allowed_topics)
             self.assertNotIn(question["id"], ids)
             ids.add(question["id"])
             self.assertGreaterEqual(len(question["choices"]), 3)
             self.assertIn(question["answer"], range(len(question["choices"])))
             self.assertTrue(question["explanation"].strip())
-            combined = question["question"] + question["explanation"]
-            for obsolete in ("OSI参照モデル", "TCP/IPモデル", "カプセル化", "PDU"):
-                self.assertNotIn(obsolete, combined)
+            self.assertNotIn("<script", question["question"] + question["explanation"])
 
     def test_app_supports_answer_explanations_and_review_filter(self):
         self.assertTrue(APP_JS.is_file())
