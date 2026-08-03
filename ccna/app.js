@@ -5,15 +5,17 @@
   const list = document.getElementById("question-list");
   const progress = document.getElementById("quiz-progress");
   const filterButton = document.getElementById("review-filter");
+  const chapterFilter = document.getElementById("chapter-filter");
   const resetButton = document.getElementById("progress-reset");
   const emptyState = document.getElementById("review-empty");
   const lastAnswer = document.getElementById("last-answer");
 
-  if (!list || !progress || !filterButton || !resetButton || !emptyState || !lastAnswer) return;
+  if (!list || !progress || !filterButton || !chapterFilter || !resetButton || !emptyState || !lastAnswer) return;
 
   const storage = CCNAQuizState.acquire(window);
   const saved = CCNAQuizState.load(storage, STORAGE_KEY, CCNA_QUESTIONS);
   let reviewOnly = false;
+  let selectedChapter = chapterFilter.value;
 
   function randomInt(max) {
     if (max <= 1) return 0;
@@ -49,16 +51,24 @@
     return CCNAQuizState.save(storage, STORAGE_KEY, saved);
   }
 
+  function chapterQuestions() {
+    if (selectedChapter === "all") return CCNA_QUESTIONS;
+    return CCNA_QUESTIONS.filter((question) => question.chapter === selectedChapter);
+  }
+
   function visibleQuestions() {
-    if (!reviewOnly) return CCNA_QUESTIONS;
-    return CCNA_QUESTIONS.filter((question) => saved[question.id] === "wrong");
+    const questions = chapterQuestions();
+    if (!reviewOnly) return questions;
+    return questions.filter((question) => saved[question.id] === "wrong");
   }
 
   function updateProgress() {
-    const answered = CCNA_QUESTIONS.filter((question) => saved[question.id]).length;
-    const correct = CCNA_QUESTIONS.filter((question) => saved[question.id] === "correct").length;
-    const review = CCNA_QUESTIONS.filter((question) => saved[question.id] === "wrong").length;
-    progress.textContent = `${CCNA_QUESTIONS.length}問中 ${answered}問回答・${correct}問正解・要復習${review}問`;
+    const questions = chapterQuestions();
+    const answered = questions.filter((question) => saved[question.id]).length;
+    const correct = questions.filter((question) => saved[question.id] === "correct").length;
+    const review = questions.filter((question) => saved[question.id] === "wrong").length;
+    const label = selectedChapter === "all" ? "全章" : selectedChapter;
+    progress.textContent = `${label}・${questions.length}問中 ${answered}問回答・${correct}問正解・要復習${review}問`;
   }
 
   function clearLastAnswer() {
@@ -133,9 +143,9 @@
 
     const meta = document.createElement("p");
     meta.className = "quiz-meta";
-    meta.textContent = `${question.session}・${question.topic}`;
+    meta.textContent = `${question.chapter}・${question.session}・${question.topic}`;
 
-    const heading = document.createElement("h2");
+    const heading = document.createElement("h3");
     heading.className = "quiz-question";
     heading.textContent = `Q${displayIndex + 1}. ${question.question}`;
 
@@ -167,14 +177,38 @@
     return card;
   }
 
+  function buildChapterSection(chapter, questions, startIndex) {
+    const section = document.createElement("section");
+    section.className = "chapter-section";
+    const heading = document.createElement("h2");
+    heading.className = "chapter-heading";
+    heading.textContent = chapter;
+    section.append(heading, ...questions.map((question, index) => buildCard(question, startIndex + index)));
+    return section;
+  }
+
   function render() {
     const questions = visibleQuestions().map(shuffledQuestion);
-    list.replaceChildren(...questions.map(buildCard));
+    const chapters = [...new Set(questions.map((question) => question.chapter))];
+    let displayIndex = 0;
+    const sections = chapters.map((chapter) => {
+      const chapterItems = questions.filter((question) => question.chapter === chapter);
+      const section = buildChapterSection(chapter, chapterItems, displayIndex);
+      displayIndex += chapterItems.length;
+      return section;
+    });
+    list.replaceChildren(...sections);
     emptyState.hidden = questions.length !== 0;
     filterButton.textContent = reviewOnly ? "全問を表示" : "要復習だけ表示";
     filterButton.setAttribute("aria-pressed", String(reviewOnly));
     updateProgress();
   }
+
+  chapterFilter.addEventListener("change", () => {
+    selectedChapter = chapterFilter.value;
+    clearLastAnswer();
+    render();
+  });
 
   filterButton.addEventListener("click", () => {
     reviewOnly = !reviewOnly;
@@ -186,6 +220,8 @@
     Object.keys(saved).forEach((key) => delete saved[key]);
     saveProgress();
     reviewOnly = false;
+    selectedChapter = "all";
+    chapterFilter.value = "all";
     clearLastAnswer();
     render();
   });

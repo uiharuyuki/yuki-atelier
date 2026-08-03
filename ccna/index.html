@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="学習済みのCCNA範囲だけを選択式で復習する問題集。回答後に正解と解説を確認できます。" />
+  <meta name="description" content="学習済みのCCNA範囲だけを章別・選択式で復習する問題集。回答後に正解と解説を確認できます。" />
   <title>CCNA 復習問題集 ｜ yuki's atelier</title>
   <link rel="icon" href="../assets/icons/favicon.ico" sizes="any" />
   <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
@@ -29,7 +29,9 @@
       box-shadow: var(--shadow);
     }
     .quiz-progress { margin: 0; color: var(--ink-soft); font-weight: 600; }
-    .quiz-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .quiz-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+    .chapter-picker { display: grid; gap: 4px; color: var(--ink-soft); font-size: .82rem; font-weight: 600; }
+    .chapter-picker .quiz-action { min-width: 112px; }
     .quiz-action {
       min-height: 42px;
       padding: 8px 13px;
@@ -41,7 +43,15 @@
       font: inherit;
     }
     .quiz-action:hover { border-color: var(--accent); }
-    .question-list { display: grid; gap: 16px; }
+    .question-list { display: grid; gap: 28px; }
+    .chapter-section { display: grid; gap: 16px; }
+    .chapter-heading {
+      margin: 0;
+      padding: 0 2px 8px;
+      border-bottom: 2px solid var(--accent);
+      color: var(--ink-strong);
+      font-size: 1.35rem;
+    }
     .quiz-card {
       padding: 18px 20px;
       border: 1px solid var(--border);
@@ -102,7 +112,8 @@
     }
     @media (max-width: 600px) {
       .quiz-toolbar { align-items: stretch; }
-      .quiz-actions { display: grid; width: 100%; grid-template-columns: 1fr 1fr; }
+      .quiz-actions { display: grid; width: 100%; grid-template-columns: 1fr; }
+      .chapter-picker .quiz-action { width: 100%; }
       .quiz-card { padding: 16px; }
     }
   </style>
@@ -130,18 +141,26 @@
     <section class="hero">
       <h1 class="hero-title">CCNA 復習問題集</h1>
       <p class="hero-lead">
-        momokaとの授業で学んだ範囲だけを、選択式で復習する問題集です。
+        momokaとの授業で学んだ範囲だけを、章別の選択式で復習する問題集です。
         選択肢を押すと、正解と解説がその場で表示されます。
       </p>
     </section>
 
     <section class="home-section" aria-labelledby="current-scope">
       <h2 class="section-title" id="current-scope">現在の収録範囲</h2>
-      <p class="section-lead">2026-07-25〜2026-07-29に学んだネットワーク基礎から23問。未学習の範囲は出題しません。</p>
+      <p class="section-lead">第01章のネットワーク基礎23問と、第02章のIP計算・サブネット7問を収録。未学習の範囲は出題しません。</p>
 
       <div class="quiz-toolbar">
         <p class="quiz-progress" id="quiz-progress" aria-live="polite"></p>
         <div class="quiz-actions">
+          <label class="chapter-picker" for="chapter-filter">
+            表示する章
+            <select class="quiz-action" id="chapter-filter">
+              <option value="all">全章</option>
+              <option value="第01章">第01章</option>
+              <option value="第02章">第02章</option>
+            </select>
+          </label>
           <button class="quiz-action" id="review-filter" type="button" aria-pressed="false">要復習だけ表示</button>
           <button class="quiz-action" id="progress-reset" type="button">進捗をリセット</button>
         </div>
@@ -149,7 +168,7 @@
 
       <div class="last-answer" id="last-answer" role="status" aria-live="polite" aria-atomic="true" tabindex="-1" hidden></div>
       <div class="question-list" id="question-list"></div>
-      <p class="review-empty" id="review-empty" hidden>要復習の問題はありません。全問表示へ戻せます。</p>
+      <p class="review-empty" id="review-empty" hidden>この条件に該当する問題はありません。章または表示条件を変更できます。</p>
     </section>
   </main>
 
@@ -159,6 +178,8 @@
     </div>
   </footer>
 
+  <script src="questions-ch01.js"></script>
+  <script src="questions-ch02.js"></script>
   <script src="questions.js"></script>
   <script src="state.js"></script>
   <script src="app.js"></script>

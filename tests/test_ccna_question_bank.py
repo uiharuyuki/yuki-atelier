@@ -6,6 +6,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CCNA_HTML = ROOT / "ccna" / "index.html"
 QUESTIONS_JS = ROOT / "ccna" / "questions.js"
+CHAPTER_01_JS = ROOT / "ccna" / "questions-ch01.js"
+CHAPTER_02_JS = ROOT / "ccna" / "questions-ch02.js"
 APP_JS = ROOT / "ccna" / "app.js"
 STATE_JS = ROOT / "ccna" / "state.js"
 ROOT_HTML = ROOT / "index.html"
@@ -22,24 +24,37 @@ class CcnaQuestionBankTests(unittest.TestCase):
         for obsolete in ("<h3>教科書</h3>", "OSI参照モデル", "TCP/IP モデル", "カプセル化とPDU"):
             self.assertNotIn(obsolete, html)
 
+    def test_question_sources_are_split_by_chapter(self):
+        self.assertTrue(CHAPTER_01_JS.is_file())
+        self.assertTrue(CHAPTER_02_JS.is_file())
+        html = CCNA_HTML.read_text(encoding="utf-8")
+        chapter_01_script = 'src="questions-ch01.js"'
+        chapter_02_script = 'src="questions-ch02.js"'
+        combined_script = 'src="questions.js"'
+        self.assertLess(html.index(chapter_01_script), html.index(chapter_02_script))
+        self.assertLess(html.index(chapter_02_script), html.index(combined_script))
+        combined = QUESTIONS_JS.read_text(encoding="utf-8")
+        self.assertIn("...CCNA_CHAPTER_01_QUESTIONS", combined)
+        self.assertIn("...CCNA_CHAPTER_02_QUESTIONS", combined)
+
     def test_questions_only_cover_the_current_lesson(self):
         self.assertTrue(QUESTIONS_JS.is_file())
         script = (
             "const fs=require('fs'),vm=require('vm');"
-            "const code=fs.readFileSync(process.argv[1],'utf8');"
+            "const code=process.argv.slice(1).map(path=>fs.readFileSync(path,'utf8')).join('\\n');"
             "const data=vm.runInNewContext(code+'\\nJSON.stringify(CCNA_QUESTIONS)');"
             "process.stdout.write(data);"
         )
         result = subprocess.run(
-            ["node", "-e", script, str(QUESTIONS_JS)],
+            ["node", "-e", script, str(CHAPTER_01_JS), str(CHAPTER_02_JS), str(QUESTIONS_JS)],
             check=True,
             capture_output=True,
             text=True,
         )
         questions = json.loads(result.stdout)
-        self.assertEqual(len(questions), 23)
+        self.assertEqual(len(questions), 30)
         ids = set()
-        allowed_sessions = {"2026-07-25", "2026-07-29"}
+        allowed_sessions = {"2026-07-25", "2026-07-29", "2026-08-03"}
         allowed_topics = {
             "ネットワークとは何か",
             "LANとWAN",
@@ -53,16 +68,39 @@ class CcnaQuestionBankTests(unittest.TestCase):
             "SSHとTelnet",
             "ネットワーク機器",
             "デフォルトゲートウェイ",
+            "2進数",
+            "プレフィックス長",
+            "ホスト数",
+            "サブネット数",
+            "ブロックサイズ",
+            "ネットワークアドレス",
+            "ホスト範囲",
         }
         for question in questions:
             self.assertIn(question["session"], allowed_sessions)
             self.assertIn(question["topic"], allowed_topics)
+            self.assertIn(question["chapter"], {"第01章", "第02章"})
+            expected_chapter = "第02章" if question["session"] == "2026-08-03" else "第01章"
+            self.assertEqual(question["chapter"], expected_chapter)
             self.assertNotIn(question["id"], ids)
             ids.add(question["id"])
             self.assertGreaterEqual(len(question["choices"]), 3)
             self.assertIn(question["answer"], range(len(question["choices"])))
             self.assertTrue(question["explanation"].strip())
             self.assertNotIn("<script", question["question"] + question["explanation"])
+            if question["topic"] in {"ネットワークアドレス", "ホスト範囲"}:
+                self.assertIn("【補足】", question["question"])
+
+    def test_chapter_filter_separates_chapter_01_and_02(self):
+        html = CCNA_HTML.read_text(encoding="utf-8")
+        app = APP_JS.read_text(encoding="utf-8")
+        self.assertIn('id="chapter-filter"', html)
+        self.assertIn('value="第01章"', html)
+        self.assertIn('value="第02章"', html)
+        self.assertIn("chapterFilter", app)
+        self.assertIn("selectedChapter", app)
+        self.assertIn("question.chapter === selectedChapter", app)
+        self.assertIn("chapter-heading", app)
 
     def test_app_supports_answer_explanations_and_review_filter(self):
         self.assertTrue(APP_JS.is_file())
@@ -88,8 +126,8 @@ class CcnaQuestionBankTests(unittest.TestCase):
         script = r"""
 const fs = require('fs');
 const vm = require('vm');
-const questionsCode = fs.readFileSync(process.argv[1], 'utf8');
-const stateCode = fs.readFileSync(process.argv[2], 'utf8');
+const questionsCode = process.argv.slice(1, 4).map(path => fs.readFileSync(path, 'utf8')).join('\n');
+const stateCode = fs.readFileSync(process.argv[4], 'utf8');
 const context = {};
 vm.createContext(context);
 vm.runInContext(questionsCode + '\nthis.questions = CCNA_QUESTIONS;', context);
@@ -116,7 +154,7 @@ const restored = context.stateApi.load(malformedStorage, 'key', context.question
 if (JSON.stringify(restored) !== JSON.stringify({[known]: 'wrong'})) process.exit(4);
 """
         subprocess.run(
-            ["node", "-e", script, str(QUESTIONS_JS), str(STATE_JS)],
+            ["node", "-e", script, str(CHAPTER_01_JS), str(CHAPTER_02_JS), str(QUESTIONS_JS), str(STATE_JS)],
             check=True,
             capture_output=True,
             text=True,
