@@ -118,7 +118,7 @@
     }
   </style>
 </head>
-<body>
+<body class="ccna-page">
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="../index.html">
@@ -151,7 +151,12 @@
       <p class="section-lead">第01章のネットワーク基礎23問、第02章のIP計算・サブネット7問、第03章のレイヤ2基礎10問を収録。未学習の範囲は出題しません。</p>
 
       <div class="quiz-toolbar">
-        <p class="quiz-progress" id="quiz-progress" aria-live="polite"></p>
+        <div class="quiz-progress-summary">
+          <p class="quiz-progress" id="quiz-progress" aria-live="polite"></p>
+          <div class="quiz-progress-track" role="progressbar" aria-label="回答の進捗" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span class="quiz-progress-fill" id="quiz-progress-fill"></span>
+          </div>
+        </div>
         <div class="quiz-actions">
           <label class="chapter-picker" for="chapter-filter">
             表示する章

@@ -4,6 +4,8 @@
   const STORAGE_KEY = "yuki_atelier_ccna_review_v1";
   const list = document.getElementById("question-list");
   const progress = document.getElementById("quiz-progress");
+  const progressFill = document.getElementById("quiz-progress-fill");
+  const progressTrack = progressFill ? progressFill.parentElement : null;
   const filterButton = document.getElementById("review-filter");
   const chapterFilter = document.getElementById("chapter-filter");
   const resetButton = document.getElementById("progress-reset");
@@ -69,6 +71,9 @@
     const review = questions.filter((question) => saved[question.id] === "wrong").length;
     const label = selectedChapter === "all" ? "全章" : selectedChapter;
     progress.textContent = `${label}・${questions.length}問中 ${answered}問回答・${correct}問正解・要復習${review}問`;
+    const percentage = questions.length ? Math.round((answered / questions.length) * 100) : 0;
+    if (progressFill) progressFill.style.width = `${percentage}%`;
+    if (progressTrack) progressTrack.setAttribute("aria-valuenow", String(percentage));
   }
 
   function clearLastAnswer() {
