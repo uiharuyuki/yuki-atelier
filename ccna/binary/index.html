@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CCNA学習用の二進数変換・ビット確認・AND演算トレーニングツール。" />
+  <title>二進数トレーニング ｜ CCNA ｜ yuki's atelier</title>
+  <link rel="icon" href="../../assets/icons/favicon.ico" sizes="any" />
+  <link rel="icon" href="../../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="stylesheet" href="../../css/style.css" />
+  <style>
+    .binary-page .hero { padding-bottom: 24px; }
+    .tool-grid { display: grid; gap: 20px; }
+    .tool-card { padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--paper); box-shadow: var(--shadow); }
+    .tool-card h2 { margin-bottom: 8px; }
+    .tool-card > p { color: var(--ink-soft); }
+    .binary-display { display: grid; gap: 16px; margin-top: 18px; }
+    .binary-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .binary-value { display: grid; gap: 4px; padding: 14px; border-radius: var(--radius-sm); background: var(--paper-deep); }
+    .binary-value span { color: var(--ink-soft); font-size: .82rem; }
+    .binary-value code { color: var(--ink-strong); font-size: clamp(1.2rem, 5vw, 1.8rem); letter-spacing: .08em; overflow-wrap: anywhere; }
+    .bit-grid { display: grid; grid-template-columns: repeat(8, minmax(44px, 1fr)); gap: 6px; }
+    .bit-button { display: grid; gap: 2px; min-height: 74px; padding: 8px 4px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--paper-deep); color: var(--ink); cursor: pointer; font: inherit; text-align: center; }
+    .bit-button:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .bit-button[data-active="true"] { border-color: var(--accent-deep); background: var(--accent); color: #fffaf0; }
+    .bit-weight { font-family: var(--font-mono); font-size: .75rem; opacity: .82; }
+    .bit-value { font-family: var(--font-mono); font-size: 1.35rem; font-weight: 700; }
+    .input-row { display: grid; gap: 7px; margin-top: 16px; }
+    .input-row label { color: var(--ink-soft); font-weight: 700; }
+    .tool-input { width: 100%; min-height: 46px; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--paper-deep); color: var(--ink); font: 1rem var(--font-mono); }
+    .tool-input:focus { border-color: var(--accent); outline: 3px solid rgba(233, 113, 52, .22); }
+    .and-rows { display: grid; gap: 8px; margin-top: 16px; }
+    .and-row { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 10px; }
+    .and-row-label { color: var(--ink-soft); font-size: .88rem; font-weight: 700; }
+    .and-row code { padding: 9px 12px; border-radius: var(--radius-xs); background: var(--code-bg); color: var(--code-text); letter-spacing: .1em; }
+    .and-result { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--accent); background: var(--paper-deep); font-family: var(--font-mono); overflow-wrap: anywhere; }
+    .and-result[data-state="error"] { border-left-color: var(--ng-text); color: var(--ng-text); font-family: var(--font-body); }
+    .practice-box { display: grid; gap: 12px; padding: 16px; border-radius: var(--radius-sm); background: var(--paper-deep); }
+    .practice-question { margin: 0; color: var(--ink-strong); font-size: 1.05rem; font-weight: 700; }
+    .practice-answer { margin: 0; color: var(--accent-deep); font: 700 1.25rem var(--font-mono); letter-spacing: .08em; }
+    .practice-feedback { margin: 0; color: var(--ink-soft); }
+    .practice-feedback[data-state="ok"] { color: var(--ok-text); }
+    .tool-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tool-button { min-height: 44px; padding: 9px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--paper); color: var(--ink); cursor: pointer; font: inherit; font-weight: 700; }
+    .tool-button:hover { border-color: var(--accent); }
+    .tool-button.primary { border-color: var(--accent-deep); background: var(--accent); color: #fffaf0; }
+    .tool-note { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--info-bd); border-radius: var(--radius-sm); background: var(--info-bg); }
+    @media (min-width: 760px) { .tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } .tool-card:first-child { grid-column: 1 / -1; } }
+    @media (max-width: 500px) { .binary-summary { grid-template-columns: 1fr; } .bit-grid { gap: 3px; } .bit-button { min-height: 68px; } .bit-weight { font-size: .65rem; } }
+  </style>
+</head>
+<body class="binary-page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="../../index.html"><span class="brand-mark brand-mark-image" aria-hidden="true"><img src="../../assets/icons/atelier-icon.png" alt="" /></span><span class="brand-text">yuki's atelier</span></a>
+      <div class="header-tools">
+        <nav class="primary-nav" aria-label="メインメニュー"><a class="nav-link" href="../index.html">← CCNA問題集</a></nav>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="テーマ切替" aria-pressed="false">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="app" tabindex="-1">
+    <section class="hero">
+      <h1 class="hero-title">二進数トレーニング</h1>
+      <p class="hero-lead">CCNAのIP計算で使う、8ビットの変換とAND演算を確認する道具。答えを出すだけでなく、ビットの重みを見ながら自力で考えるために使います。</p>
+    </section>
+
+    <div class="tool-grid">
+      <section class="tool-card" aria-labelledby="conversion-title">
+        <h2 id="conversion-title">10進数 ⇄ 8ビット二進数</h2>
+        <p>10進数を入力するか、下のビットを押して値を組み立てる。1になっている桁の重みを足す。</p>
+        <div class="input-row"><label for="decimal-input">10進数（0〜255）</label><input class="tool-input" id="decimal-input" type="number" min="0" max="255" step="1" value="0" inputmode="numeric" /></div>
+        <div class="binary-display">
+          <div class="binary-summary"><div class="binary-value"><span>二進数</span><code id="binary-output">00000000</code></div><div class="binary-value"><span>ビットから計算した10進数</span><code id="decimal-from-bits">0</code></div></div>
+          <div class="bit-grid" aria-label="ビットの重み"><button class="bit-button" type="button" data-bit-index="0" aria-pressed="false"><span class="bit-weight">128</span><span class="bit-value">0</span></button><button class="bit-button" type="button" data-bit-index="1" aria-pressed="false"><span class="bit-weight">64</span><span class="bit-value">0</span></button><button class="bit-button" type="button" data-bit-index="2" aria-pressed="false"><span class="bit-weight">32</span><span class="bit-value">0</span></button><button class="bit-button" type="button" data-bit-index="3" aria-pressed="false"><span class="bit-weight">16</span><span class="bit-value">0</span></button><button class="bit-button" type="button" data-bit-index="4" aria-pressed="false"><span class="bit-weight">8</span><span class="bit-value">0</span></button><button class="bit-button" type="button" data-bit-index="5" aria-pressed="false"><span class="bit-weight">4</span><span class="bit-value">0</span></button><button class="bit-button" type="button" data-bit-index="6" aria-pressed="false"><span class="bit-weight">2</span><span class="bit-value">0</span></button><button class="bit-button" type="button" data-bit-index="7" aria-pressed="false"><span class="bit-weight">1</span><span class="bit-value">0</span></button></div>
+        </div>
+      </section>
+
+      <section class="tool-card" aria-labelledby="and-title">
+        <h2 id="and-title">AND演算を確認</h2>
+        <p>同じ位置が「1 AND 1」のときだけ、結果が1になる。IPアドレスとマスクの計算前に使う。</p>
+        <div class="input-row"><label for="and-left">左の二進数</label><input class="tool-input" id="and-left" type="text" value="11000000" inputmode="numeric" maxlength="8" /></div>
+        <div class="input-row"><label for="and-right">右の二進数</label><input class="tool-input" id="and-right" type="text" value="11100000" inputmode="numeric" maxlength="8" /></div>
+        <div class="and-rows" id="and-rows"></div>
+        <p class="and-result" id="and-result" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="tool-card" aria-labelledby="practice-title">
+        <h2 id="practice-title">変換練習</h2>
+        <p>先に暗算してから、答えを表示する。必要なら次の数値へ進む。</p>
+        <div class="practice-box"><p class="practice-question" id="practice-question"></p><p class="practice-answer" id="practice-answer" hidden></p><p class="practice-feedback" id="practice-feedback" role="status" aria-live="polite"></p><div class="tool-actions"><button class="tool-button primary" id="reveal-answer" type="button">答えを表示</button><button class="tool-button" id="next-question" type="button">次の問題</button></div></div>
+      </section>
+    </div>
+
+    <aside class="tool-note"><strong>使い方の目安</strong><br />最初はビットを押して仕組みを確認する。慣れたら入力欄を見ずに、問題集の計算を自力で解いてからここで答え合わせする。</aside>
+  </main>
+
+  <footer class="site-footer"><div class="container"><small>&copy; yuki's atelier ｜ 二進数トレーニング</small></div></footer>
+  <script src="../binary.js"></script>
+  <script src="../../assets/js/theme.js"></script>
+</body>
+</html>
