@@ -1,5 +1,6 @@
 import json
 import subprocess
+import unicodedata
 import unittest
 from pathlib import Path
 
@@ -66,6 +67,7 @@ class CcnaQuestionBankTests(unittest.TestCase):
         self.assertEqual(sum(question["chapter"] == "第03章" for question in questions), 10)
         self.assertEqual(sum(question["chapter"] == "第04章" for question in questions), 15)
         ids = set()
+        normalized_question_texts = set()
         allowed_sessions = {"2026-07-25", "2026-07-29", "2026-08-03", "2026-08-05"}
         allowed_topics = {
             "ネットワークとは何か",
@@ -125,7 +127,17 @@ class CcnaQuestionBankTests(unittest.TestCase):
             self.assertEqual(question["chapter"], expected_chapter)
             self.assertNotIn(question["id"], ids)
             ids.add(question["id"])
-            self.assertGreaterEqual(len(question["choices"]), 3)
+            self.assertEqual(len(question["choices"]), 4)
+            self.assertEqual(len(question["choices"]), len(set(question["choices"])))
+            normalized_question = " ".join(
+                unicodedata.normalize("NFKC", question["question"]).split()
+            )
+            self.assertNotIn(
+                normalized_question,
+                normalized_question_texts,
+                f"duplicate question text: {question['question']}",
+            )
+            normalized_question_texts.add(normalized_question)
             self.assertIn(question["answer"], range(len(question["choices"])))
             self.assertTrue(question["explanation"].strip())
             self.assertNotIn("<script", question["question"] + question["explanation"])
