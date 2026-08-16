@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="yuki's atelier の明示指示式解説HTML一覧">
+  <meta name="color-scheme" content="light dark">
+  <title>解説HTML | yuki's atelier</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f7f2e8;
+      --surface: #fffdf8;
+      --ink: #27221d;
+      --muted: #6f655a;
+      --accent: #b55232;
+      --accent-soft: #f2ded3;
+      --line: #d9cdbf;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+      line-height: 1.75;
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: clamp(20px, 5vw, 56px) 18px 72px;
+      background:
+        linear-gradient(90deg, transparent 0 49%, color-mix(in srgb, var(--line) 24%, transparent) 49% 51%, transparent 51%) top / 36px 36px,
+        var(--paper);
+    }
+
+    main {
+      width: min(700px, 100%);
+      margin: 0 auto;
+      padding: clamp(28px, 6vw, 58px);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      box-shadow: 0 18px 50px color-mix(in srgb, var(--ink) 10%, transparent);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      margin: 0 0 1rem;
+      color: var(--accent);
+      font: 700 .76rem/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .kicker::before {
+      width: 2.4rem;
+      height: 2px;
+      content: "";
+      background: currentColor;
+    }
+
+    h1, h2 {
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+      letter-spacing: .015em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 8vw, 3.45rem);
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+    }
+
+    .lead {
+      margin: 1.3rem 0 2.7rem;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .entry {
+      position: relative;
+      display: block;
+      padding: 1.5rem 1.4rem 1.4rem 1.7rem;
+      color: inherit;
+      text-decoration: none;
+      background: color-mix(in srgb, var(--accent-soft) 48%, var(--surface));
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+    }
+
+    .entry:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    .entry-number {
+      display: block;
+      margin-bottom: .4rem;
+      color: var(--accent);
+      font: 700 .75rem/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .12em;
+    }
+
+    .entry-title {
+      display: block;
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+      font-size: 1.38rem;
+      font-weight: 700;
+    }
+
+    .entry-description {
+      display: block;
+      margin-top: .55rem;
+      color: var(--muted);
+      font-size: .94rem;
+    }
+
+    .entry-action {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .note {
+      margin: 2rem 0 0;
+      padding-top: 1.5rem;
+      color: var(--muted);
+      font-size: .87rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 2.5rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-underline-offset: .22em;
+    }
+
+    .back:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #171411;
+        --surface: #211d19;
+        --ink: #f2e9dc;
+        --muted: #b9ac9d;
+        --accent: #ef946f;
+        --accent-soft: #3c2a22;
+        --line: #4b4036;
+      }
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 14px 10px 44px; }
+      main { padding: 28px 20px 34px; }
+      .entry { padding: 1.25rem 1rem 1.2rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="kicker">Explanations</p>
+    <h1>解説HTML</h1>
+    <p class="lead">明示的な依頼で作成した、読み物形式のHTMLをまとめる入口です。README保存時の自動生成とは独立しています。</p>
+
+    <a class="entry" href="first-test.html">
+      <span class="entry-number">DOCUMENT 001</span>
+      <span class="entry-title">解説HTML 表現テスト</span>
+      <span class="entry-description">見出し、表、コード、引用など、技術解説で使う基本要素の表示を確認します。</span>
+      <span class="entry-action">本文を読む →</span>
+    </a>
+
+    <p class="note">この領域のファイルは、依頼を受けたときだけ追加・更新します。</p>
+    <a class="back" href="../index.html">yuki's atelierへ戻る</a>
+  </main>
+</body>
+</html>

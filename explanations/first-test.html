@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="解説HTMLの基本要素を確認する最初のテストページ">
+  <meta name="color-scheme" content="light dark">
+  <title>解説HTML 表現テスト | yuki's atelier</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f7f2e8;
+      --surface: #fffdf8;
+      --ink: #27221d;
+      --muted: #6f655a;
+      --accent: #b55232;
+      --accent-soft: #f2ded3;
+      --line: #d9cdbf;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+      line-height: 1.85;
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      padding: clamp(20px, 5vw, 56px) 18px 72px;
+      background:
+        linear-gradient(90deg, transparent 0 49%, color-mix(in srgb, var(--line) 24%, transparent) 49% 51%, transparent 51%) top / 36px 36px,
+        var(--paper);
+    }
+
+    article {
+      width: min(700px, 100%);
+      margin: 0 auto;
+      padding: clamp(28px, 6vw, 58px);
+      overflow-wrap: anywhere;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      box-shadow: 0 18px 50px color-mix(in srgb, var(--ink) 10%, transparent);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      margin: 0 0 1rem;
+      color: var(--accent);
+      font: 700 .76rem/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .14em;
+    }
+
+    .kicker::before {
+      width: 2.4rem;
+      height: 2px;
+      content: "";
+      background: currentColor;
+    }
+
+    h1, h2, h3 {
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+      letter-spacing: .015em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 8vw, 3.35rem);
+      line-height: 1.15;
+    }
+
+    h2 {
+      position: relative;
+      margin: 3.2rem 0 1.1rem;
+      padding-left: 1rem;
+      font-size: clamp(1.35rem, 5vw, 1.75rem);
+      line-height: 1.35;
+    }
+
+    h2::before {
+      position: absolute;
+      inset: .08em auto .08em 0;
+      width: 4px;
+      content: "";
+      background: var(--accent);
+    }
+
+    h3 {
+      margin: 2rem 0 .65rem;
+      font-size: 1.12rem;
+    }
+
+    p { margin: .8rem 0 1.2rem; }
+
+    .lead {
+      margin: 1.3rem 0 2.2rem;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .55rem 1rem;
+      margin: 0 0 2.4rem;
+      padding: .8rem 1rem;
+      color: var(--muted);
+      font: 700 .78rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+      background: var(--accent-soft);
+      border: 1px solid var(--line);
+    }
+
+    a {
+      color: var(--accent);
+      font-weight: 700;
+      text-underline-offset: .22em;
+    }
+
+    a:focus-visible,
+    input:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    strong { font-weight: 800; }
+
+    em {
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+      color: color-mix(in srgb, var(--ink) 78%, var(--accent));
+    }
+
+    code {
+      padding: .12em .36em;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: .9em;
+      background: var(--accent-soft);
+      border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+      border-radius: 3px;
+    }
+
+    pre {
+      max-width: 100%;
+      margin: 1.2rem 0 1.6rem;
+      padding: 1.1rem 1.2rem;
+      overflow-x: auto;
+      color: var(--ink);
+      background: color-mix(in srgb, var(--paper) 66%, var(--surface));
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+    }
+
+    pre code {
+      padding: 0;
+      white-space: pre;
+      background: transparent;
+      border: 0;
+    }
+
+    ul, ol { padding-left: 1.4rem; }
+    li + li { margin-top: .42rem; }
+    li::marker { color: var(--accent); font-weight: 800; }
+
+    .task-list {
+      padding: 0;
+      list-style: none;
+    }
+
+    .task-list li {
+      display: grid;
+      grid-template-columns: 1.25rem 1fr;
+      gap: .65rem;
+      align-items: start;
+    }
+
+    .task-list input {
+      width: 1rem;
+      height: 1rem;
+      margin: .42rem 0 0;
+      accent-color: var(--accent);
+    }
+
+    .table-wrap {
+      margin: 1.2rem 0 1.6rem;
+      border: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .92rem;
+    }
+
+    th, td {
+      padding: .8rem .9rem;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+      background: var(--accent-soft);
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    blockquote {
+      margin: 1.5rem 0;
+      padding: 1.15rem 1.35rem;
+      color: color-mix(in srgb, var(--ink) 82%, var(--muted));
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+      background: color-mix(in srgb, var(--accent-soft) 58%, var(--surface));
+      border-left: 5px solid var(--accent);
+    }
+
+    blockquote p { margin: 0; }
+
+    .long-form {
+      padding: 1.3rem 1.4rem;
+      background: color-mix(in srgb, var(--paper) 56%, var(--surface));
+      border: 1px solid var(--line);
+    }
+
+    .page-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: .8rem 1.2rem;
+      margin-top: 3.2rem;
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #171411;
+        --surface: #211d19;
+        --ink: #f2e9dc;
+        --muted: #b9ac9d;
+        --accent: #ef946f;
+        --accent-soft: #3c2a22;
+        --line: #4b4036;
+      }
+    }
+
+    @media (max-width: 560px) {
+      html { scroll-behavior: auto; }
+      body { padding: 14px 10px 44px; }
+      article { padding: 28px 20px 34px; }
+
+      .table-wrap { border: 0; }
+      table, tbody, tr, td { display: block; width: 100%; }
+      thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+      tr {
+        margin-bottom: .8rem;
+        border: 1px solid var(--line);
+      }
+      td {
+        display: grid;
+        grid-template-columns: 6.4rem 1fr;
+        gap: .65rem;
+        border-bottom: 1px solid var(--line);
+      }
+      td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-weight: 800;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <article>
+    <header>
+      <p class="kicker">DOCUMENT 001</p>
+      <h1>解説HTML 表現テスト</h1>
+      <p class="lead">明示指示で作成する解説ページに、技術文書で使う基本要素が揃っているかを確かめるためのサンプルです。</p>
+      <p class="meta"><span>WIDTH ≈ 700PX</span><span>THEME: SYSTEM</span><span>DEPENDENCY: NONE</span></p>
+    </header>
+
+    <section>
+      <h2>文章と強調</h2>
+      <p>通常の段落では、説明の中心となる文章を落ち着いた行間で表示します。重要な箇所は<strong>太字で明確に強調</strong>し、補足的なニュアンスは<em>斜体で少し静かに示します</em>。短いコマンドやファイル名は<code>index.html</code>のようなインラインコードで区別できます。</p>
+      <p>詳しいHTML仕様を調べるときは、<a href="https://developer.mozilla.org/ja/docs/Web/HTML">MDNのHTML解説</a>を参照できます。このリンクは参考情報への導線であり、ページの表示には依存していません。</p>
+
+      <h3>基本のリスト</h3>
+      <ul>
+        <li>一つの段落には一つの主要な話題を置く</li>
+        <li>関連する項目はリストにまとめて視線の流れを整える</li>
+        <li>コードや固有名詞は本文と見分けられる表現にする</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>チェックリスト</h2>
+      <ul class="task-list">
+        <li><input type="checkbox" checked disabled aria-label="完了"><span>見出しと本文の階層が視覚的に区別できる</span></li>
+        <li><input type="checkbox" checked disabled aria-label="完了"><span>ライトテーマとダークテーマの両方で読める</span></li>
+        <li><input type="checkbox" disabled aria-label="未完了"><span>実際の解説テーマに置き換えて内容を公開する</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>比較表</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>要素</th><th>用途</th><th>表示方針</th></tr>
+          </thead>
+          <tbody>
+            <tr><td data-label="要素">段落</td><td data-label="用途">連続した説明</td><td data-label="表示方針">読みやすい行長と行間</td></tr>
+            <tr><td data-label="要素">表</td><td data-label="用途">項目の比較</td><td data-label="表示方針">スマホでは行ごとのカード表示</td></tr>
+            <tr><td data-label="要素">コード</td><td data-label="用途">入力例や設定例</td><td data-label="表示方針">横幅を超えた場合だけ内部スクロール</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>コードブロック</h2>
+      <p>次の例は、ローカルで静的ファイルを確認するための最小コマンドです。</p>
+      <pre><code>python -m http.server 8000 --bind 127.0.0.1
+# ブラウザで次のURLを開く
+http://127.0.0.1:8000/explanations/first-test.html</code></pre>
+    </section>
+
+    <section>
+      <h2>引用</h2>
+      <blockquote>
+        <p>読みやすさは装飾の量ではなく、情報の順序と余白の一貫性から生まれる。</p>
+      </blockquote>
+    </section>
+
+    <section>
+      <h2>日本語の長文</h2>
+      <p class="long-form">新しい仕組みを試すときは、単にファイルが生成されたという事実だけで完了と判断せず、文章の意味が自然に伝わるか、長い行が画面の外へはみ出さないか、表やコードが小さな画面でも操作できるか、そしてライトテーマとダークテーマのどちらでも十分なコントラストが保たれているかを順番に確認する必要があります。特に日本語は英単語のような明確な空白区切りがないため、見出しや長いパスを含む文章では折り返し方が読みやすさを大きく左右します。このページは、そのような実際の利用場面を一枚のHTMLだけで再現し、外部サービスが利用できない状況でも内容と見た目が崩れないことを確かめるために用意しています。</p>
+    </section>
+
+    <footer class="page-footer">
+      <a href="index.html">解説HTML一覧へ戻る</a>
+      <a href="../index.html">yuki's atelierへ戻る</a>
+    </footer>
+  </article>
+</body>
+</html>
