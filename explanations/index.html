@@ -78,6 +78,38 @@
       font-size: 1.04rem;
     }
 
+    .page-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      margin: 0 0 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .page-nav a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: .55rem .85rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+      background: color-mix(in srgb, var(--accent-soft) 48%, var(--surface));
+      border: 1px solid var(--line);
+    }
+
+    .page-nav a[aria-current="page"] {
+      color: var(--ink);
+      background: var(--accent-soft);
+    }
+
+    .page-nav a:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
     .entry {
       position: relative;
       display: block;
@@ -132,7 +164,9 @@
     }
 
     .back {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
       margin-top: 2.5rem;
       color: var(--accent);
       font-weight: 700;
@@ -160,16 +194,22 @@
       body { padding: 14px 10px 44px; }
       main { padding: 28px 20px 34px; }
       .entry { padding: 1.25rem 1rem 1.2rem 1.25rem; }
+      .page-nav a { flex: 1 1 9rem; }
     }
   </style>
 </head>
 <body>
   <main>
+    <nav class="page-nav" aria-label="解説HTMLナビゲーション">
+      <a href="../index.html">atelierトップ</a>
+      <a href="./index.html" aria-current="page">解説一覧</a>
+    </nav>
+
     <p class="kicker">Explanations</p>
     <h1>解説HTML</h1>
     <p class="lead">明示的な依頼で作成した、読み物形式のHTMLをまとめる入口です。README保存時の自動生成とは独立しています。</p>
 
-    <a class="entry" href="first-test.html">
+    <a class="entry" href="./first-test.html">
       <span class="entry-number">DOCUMENT 001</span>
       <span class="entry-title">解説HTML 表現テスト</span>
       <span class="entry-description">見出し、表、コード、引用など、技術解説で使う基本要素の表示を確認します。</span>

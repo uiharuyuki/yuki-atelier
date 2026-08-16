@@ -114,6 +114,28 @@
       border: 1px solid var(--line);
     }
 
+    .page-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      margin: 0 0 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .page-nav a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: .55rem .85rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+      background: color-mix(in srgb, var(--accent-soft) 48%, var(--surface));
+      border: 1px solid var(--line);
+    }
+
     a {
       color: var(--accent);
       font-weight: 700;
@@ -235,6 +257,13 @@
       border-top: 1px solid var(--line);
     }
 
+    .page-footer a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: .35rem 0;
+    }
+
     @media (prefers-color-scheme: dark) {
       :root {
         --paper: #171411;
@@ -251,6 +280,8 @@
       html { scroll-behavior: auto; }
       body { padding: 14px 10px 44px; }
       article { padding: 28px 20px 34px; }
+      .page-nav a { flex: 1 1 9rem; }
+      .page-footer a { flex: 1 1 10rem; justify-content: center; }
 
       .table-wrap { border: 0; }
       table, tbody, tr, td { display: block; width: 100%; }
@@ -286,6 +317,11 @@
 </head>
 <body>
   <article>
+    <nav class="page-nav" aria-label="解説HTMLナビゲーション">
+      <a href="../index.html">atelierトップ</a>
+      <a href="./index.html">解説一覧へ戻る</a>
+    </nav>
+
     <header>
       <p class="kicker">DOCUMENT 001</p>
       <h1>解説HTML 表現テスト</h1>
@@ -352,7 +388,7 @@ http://127.0.0.1:8000/explanations/first-test.html</code></pre>
     </section>
 
     <footer class="page-footer">
-      <a href="index.html">解説HTML一覧へ戻る</a>
+      <a href="./index.html">解説HTML一覧へ戻る</a>
       <a href="../index.html">yuki's atelierへ戻る</a>
     </footer>
   </article>
