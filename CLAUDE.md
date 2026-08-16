@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # yuki-atelier プロジェクトの作業ルール
 
 ## Git 運用方針
