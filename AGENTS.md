@@ -12,14 +12,15 @@
 ### README.md 自動変換
 
 - 対象はファイル名が正確に `README.md` のファイルだけとし、出力は同じフォルダの `README.html` とする。
-- 変換はリポジトリ内の `scripts/readme_to_html.py` と `scripts/readme-post-write.ps1` だけで行う。AI、外部API、外部CDN、追加パッケージを使わない。
-- Codexでは `.codex/hooks.json`、Claude Codeでは `.claude/settings.json` の `PostToolUse` に登録し、`Write` / `Edit` 相当の成功後に実行する。
-- 既存のユーザー共通Hookや他のHookは削除、置換、無効化しない。必要な設定は追記・併存させる。
-- 変換スクリプトは対象外ファイル、変換失敗、実行環境不足のいずれでも標準出力・標準エラーへ通知を出さず、終了コード0でエージェント本体の作業を継続させる。
+- 変換責任は、Codex／Claude Codeのユーザー共通 `PostToolUse` Hookに置く。このリポジトリへproject-local Hookやruntime変換スクリプトを重複配置しない。
+- Hookはsession起動ディレクトリではなく、編集イベントに含まれる対象ファイルパスから判断する。リポジトリ外で起動したsessionからこのリポジトリを編集した場合も同じ規則を適用する。
+- 変換はローカルスクリプトだけで行い、AI、外部API、外部CDN、追加パッケージを使わない。
+- 既存のユーザー共通Hookや他のHookは削除、置換、無効化しない。
+- 変換スクリプトは対象外ファイル、変換失敗、不正イベントのいずれでも標準出力・標準エラーへ通知を出さず、終了コード0でエージェント本体の作業を継続させる。
 - `README.md` 以外のMarkdownからHTMLを自動生成しない。
 - `README.html` を `explanations/` へコピーしない。自動でstage、commit、pushしない。
 - この自動変換は、次項の公開解説HTMLフローとは無関係である。
-- 新しいcloneやHook定義変更後は、Codexの `/hooks` とClaude Codeのworkspace trustで、内容を確認してプロジェクトHookを明示的に信頼する。信頼前は設定済み・動作済みと報告しない。
+- ユーザー共通Hookの新規導入または定義変更後は、Codexの `/hooks` とClaude Codeの新規sessionで読込・実発火を確認する。信頼前・未検証のHookを設定済み／動作済みと報告しない。
 
 ### 「htmlで解説して」の公開フロー
 
