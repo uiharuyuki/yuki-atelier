@@ -8,16 +8,22 @@
   const progressTrack = progressFill ? progressFill.parentElement : null;
   const filterButton = document.getElementById("review-filter");
   const chapterFilter = document.getElementById("chapter-filter");
+  const chapterCheckboxes = [...document.querySelectorAll("[data-chapter-filter]")];
+  const chapterSelectAll = document.getElementById("chapter-select-all");
+  const chapterClear = document.getElementById("chapter-clear");
+  const shuffleButton = document.getElementById("question-shuffle");
   const resetButton = document.getElementById("progress-reset");
   const emptyState = document.getElementById("review-empty");
   const lastAnswer = document.getElementById("last-answer");
 
-  if (!list || !progress || !filterButton || !chapterFilter || !resetButton || !emptyState || !lastAnswer) return;
+  if (!list || !progress || !filterButton || !chapterFilter || !chapterCheckboxes.length || !chapterSelectAll || !chapterClear || !shuffleButton || !resetButton || !emptyState || !lastAnswer) return;
 
   const storage = CCNAQuizState.acquire(window);
   const saved = CCNAQuizState.load(storage, STORAGE_KEY, CCNA_QUESTIONS);
+  const questionsById = new Map(CCNA_QUESTIONS.map((question) => [question.id, question]));
   let reviewOnly = false;
-  let selectedChapter = chapterFilter.value;
+  let selectedChapters = new Set(chapterCheckboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value));
+  let questionOrder = CCNA_QUESTIONS.map((question) => question.id);
 
   function randomInt(max) {
     if (max <= 1) return 0;
@@ -49,13 +55,23 @@
     };
   }
 
+  function shuffleQuestionOrder() {
+    const shuffled = [...questionOrder];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomInt(index + 1);
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+    questionOrder = shuffled;
+  }
+
   function saveProgress() {
     return CCNAQuizState.save(storage, STORAGE_KEY, saved);
   }
 
   function chapterQuestions() {
-    if (selectedChapter === "all") return CCNA_QUESTIONS;
-    return CCNA_QUESTIONS.filter((question) => question.chapter === selectedChapter);
+    return questionOrder
+      .map((questionId) => questionsById.get(questionId))
+      .filter((question) => question && selectedChapters.has(question.chapter));
   }
 
   function visibleQuestions() {
@@ -69,7 +85,11 @@
     const answered = questions.filter((question) => saved[question.id]).length;
     const correct = questions.filter((question) => saved[question.id] === "correct").length;
     const review = questions.filter((question) => saved[question.id] === "wrong").length;
-    const label = selectedChapter === "all" ? "全章" : selectedChapter;
+    const label = selectedChapters.size === chapterCheckboxes.length
+      ? "全章"
+      : selectedChapters.size === 0
+        ? "章未選択"
+        : [...selectedChapters].join("・");
     progress.textContent = `${label}・${questions.length}問中 ${answered}問回答・${correct}問正解・要復習${review}問`;
     const percentage = questions.length ? Math.round((answered / questions.length) * 100) : 0;
     if (progressFill) progressFill.style.width = `${percentage}%`;
@@ -243,27 +263,9 @@
     return card;
   }
 
-  function buildChapterSection(chapter, questions, startIndex) {
-    const section = document.createElement("section");
-    section.className = "chapter-section";
-    const heading = document.createElement("h2");
-    heading.className = "chapter-heading";
-    heading.textContent = chapter;
-    section.append(heading, ...questions.map((question, index) => buildCard(question, startIndex + index)));
-    return section;
-  }
-
   function render() {
     const questions = visibleQuestions().map(shuffledQuestion);
-    const chapters = [...new Set(questions.map((question) => question.chapter))];
-    let displayIndex = 0;
-    const sections = chapters.map((chapter) => {
-      const chapterItems = questions.filter((question) => question.chapter === chapter);
-      const section = buildChapterSection(chapter, chapterItems, displayIndex);
-      displayIndex += chapterItems.length;
-      return section;
-    });
-    list.replaceChildren(...sections);
+    list.replaceChildren(...questions.map((question, index) => buildCard(question, index)));
     emptyState.hidden = questions.length !== 0;
     filterButton.textContent = reviewOnly ? "全問を表示" : "要復習だけ表示";
     filterButton.setAttribute("aria-pressed", String(reviewOnly));
@@ -271,7 +273,27 @@
   }
 
   chapterFilter.addEventListener("change", () => {
-    selectedChapter = chapterFilter.value;
+    selectedChapters = new Set(chapterCheckboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value));
+    clearLastAnswer();
+    render();
+  });
+
+  chapterSelectAll.addEventListener("click", () => {
+    chapterCheckboxes.forEach((checkbox) => { checkbox.checked = true; });
+    selectedChapters = new Set(chapterCheckboxes.map((checkbox) => checkbox.value));
+    clearLastAnswer();
+    render();
+  });
+
+  chapterClear.addEventListener("click", () => {
+    chapterCheckboxes.forEach((checkbox) => { checkbox.checked = false; });
+    selectedChapters = new Set();
+    clearLastAnswer();
+    render();
+  });
+
+  shuffleButton.addEventListener("click", () => {
+    shuffleQuestionOrder();
     clearLastAnswer();
     render();
   });
@@ -286,8 +308,9 @@
     Object.keys(saved).forEach((key) => delete saved[key]);
     saveProgress();
     reviewOnly = false;
-    selectedChapter = "all";
-    chapterFilter.value = "all";
+    chapterCheckboxes.forEach((checkbox) => { checkbox.checked = true; });
+    selectedChapters = new Set(chapterCheckboxes.map((checkbox) => checkbox.value));
+    questionOrder = CCNA_QUESTIONS.map((question) => question.id);
     clearLastAnswer();
     render();
   });

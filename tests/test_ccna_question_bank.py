@@ -201,20 +201,30 @@ class CcnaQuestionBankTests(unittest.TestCase):
             if question["topic"] in {"ネットワークアドレス", "ホスト範囲"}:
                 self.assertIn("【補足】", question["question"])
 
-    def test_chapter_filter_separates_chapters(self):
+    def test_chapter_filter_supports_multiple_chapters(self):
         html = CCNA_HTML.read_text(encoding="utf-8")
         app = APP_JS.read_text(encoding="utf-8")
         self.assertIn('id="chapter-filter"', html)
+        self.assertEqual(html.count("data-chapter-filter"), 6)
         self.assertIn('value="第01章"', html)
         self.assertIn('value="第02章"', html)
         self.assertIn('value="第03章"', html)
         self.assertIn('value="第04章"', html)
         self.assertIn('value="第05章"', html)
         self.assertIn('value="第07章"', html)
-        self.assertIn("chapterFilter", app)
-        self.assertIn("selectedChapter", app)
-        self.assertIn("question.chapter === selectedChapter", app)
-        self.assertIn("chapter-heading", app)
+        self.assertIn('id="chapter-select-all"', html)
+        self.assertIn('id="chapter-clear"', html)
+        self.assertIn("selectedChapters", app)
+        self.assertIn("selectedChapters.has(question.chapter)", app)
+        self.assertIn("chapterCheckboxes", app)
+
+    def test_question_order_can_be_shuffled(self):
+        html = CCNA_HTML.read_text(encoding="utf-8")
+        app = APP_JS.read_text(encoding="utf-8")
+        self.assertIn('id="question-shuffle"', html)
+        self.assertIn("shuffleQuestionOrder", app)
+        self.assertIn("questionOrder = shuffled", app)
+        self.assertIn('shuffleButton.addEventListener("click"', app)
 
     def test_app_supports_answer_explanations_and_review_filter(self):
         self.assertTrue(APP_JS.is_file())

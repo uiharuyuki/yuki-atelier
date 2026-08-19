@@ -30,8 +30,25 @@
     }
     .quiz-progress { margin: 0; color: var(--ink-soft); font-weight: 600; }
     .quiz-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
-    .chapter-picker { display: grid; gap: 4px; color: var(--ink-soft); font-size: .82rem; font-weight: 600; }
-    .chapter-picker .quiz-action { min-width: 112px; }
+    .chapter-picker { min-width: min(100%, 360px); margin: 0; padding: 0; border: 0; color: var(--ink-soft); font-size: .82rem; font-weight: 600; }
+    .chapter-picker legend { margin-bottom: 6px; padding: 0; }
+    .chapter-options { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chapter-option {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      gap: 6px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--paper-deep);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .chapter-option:has(input:checked) { border-color: var(--accent); background: var(--info-bg); color: var(--accent-deep); }
+    .chapter-option input { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--accent); }
+    .chapter-selection-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+    .chapter-selection-actions .quiz-action { min-height: 36px; padding-block: 5px; font-size: .82rem; }
     .quiz-action {
       min-height: 42px;
       padding: 8px 13px;
@@ -113,7 +130,10 @@
     @media (max-width: 600px) {
       .quiz-toolbar { align-items: stretch; }
       .quiz-actions { display: grid; width: 100%; grid-template-columns: 1fr; }
-      .chapter-picker .quiz-action { width: 100%; }
+      .chapter-picker { width: 100%; }
+      .chapter-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chapter-option { min-width: 0; }
+      .chapter-selection-actions .quiz-action { width: auto; }
       .quiz-card { padding: 16px; }
     }
   </style>
@@ -159,18 +179,22 @@
         </div>
         <div class="quiz-actions">
           <a class="quiz-action" href="binary/index.html">二進数ツール</a>
-          <label class="chapter-picker" for="chapter-filter">
-            表示する章
-            <select class="quiz-action" id="chapter-filter">
-              <option value="all">全章</option>
-              <option value="第01章">第01章</option>
-              <option value="第02章">第02章</option>
-              <option value="第03章">第03章</option>
-              <option value="第04章">第04章</option>
-              <option value="第05章">第05章（予習）</option>
-              <option value="第07章">第07章（予習）</option>
-            </select>
-          </label>
+          <fieldset class="chapter-picker" id="chapter-filter">
+            <legend>表示する章（複数選択可）</legend>
+            <div class="chapter-options">
+              <label class="chapter-option"><input type="checkbox" value="第01章" data-chapter-filter checked>第01章</label>
+              <label class="chapter-option"><input type="checkbox" value="第02章" data-chapter-filter checked>第02章</label>
+              <label class="chapter-option"><input type="checkbox" value="第03章" data-chapter-filter checked>第03章</label>
+              <label class="chapter-option"><input type="checkbox" value="第04章" data-chapter-filter checked>第04章</label>
+              <label class="chapter-option"><input type="checkbox" value="第05章" data-chapter-filter checked>第05章</label>
+              <label class="chapter-option"><input type="checkbox" value="第07章" data-chapter-filter checked>第07章</label>
+            </div>
+            <div class="chapter-selection-actions">
+              <button class="quiz-action" id="chapter-select-all" type="button">全章を選択</button>
+              <button class="quiz-action" id="chapter-clear" type="button">選択を解除</button>
+            </div>
+          </fieldset>
+          <button class="quiz-action" id="question-shuffle" type="button">問題をシャッフル</button>
           <button class="quiz-action" id="review-filter" type="button" aria-pressed="false">要復習だけ表示</button>
           <button class="quiz-action" id="progress-reset" type="button">進捗をリセット</button>
         </div>
