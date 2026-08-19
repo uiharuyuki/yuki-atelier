@@ -81,13 +81,59 @@
     lastAnswer.hidden = true;
   }
 
+  function createCodeBlock(text) {
+    const code = document.createElement("code");
+    code.textContent = text;
+    code.style.cssText = "display:block;font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;font-size:clamp(.78rem,2.2vw,.92rem);font-weight:600;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word";
+    return code;
+  }
+
+  function setChoiceContent(button, text, displayIndex, status = "") {
+    button.replaceChildren();
+    button.style.display = "grid";
+    button.style.gridTemplateColumns = "2rem minmax(0, 1fr)";
+    button.style.alignItems = "start";
+    button.style.gap = "10px";
+
+    const marker = document.createElement("span");
+    marker.textContent = `${String.fromCharCode(65 + displayIndex)}.`;
+    marker.style.fontWeight = "800";
+    marker.setAttribute("aria-hidden", "true");
+
+    const content = document.createElement("span");
+    content.style.minWidth = "0";
+    if (text.includes("\n")) {
+      content.appendChild(createCodeBlock(text));
+    } else {
+      content.textContent = text;
+    }
+
+    if (status) {
+      const statusText = document.createElement("strong");
+      statusText.textContent = status;
+      statusText.style.display = "block";
+      statusText.style.marginTop = "8px";
+      content.appendChild(statusText);
+    }
+
+    button.append(marker, content);
+    button.setAttribute("aria-label", `${String.fromCharCode(65 + displayIndex)}. ${text}${status ? ` ${status}` : ""}`);
+  }
+
   function showLastAnswer(question, storageSaved) {
     lastAnswer.hidden = false;
     lastAnswer.replaceChildren();
     const title = document.createElement("strong");
     title.textContent = "正解して要復習から外れました";
-    const answer = document.createElement("p");
-    answer.textContent = `正解: ${question.choices[question.answer]}`;
+    const answer = document.createElement("div");
+    const correctChoice = question.choices[question.answer];
+    if (correctChoice.includes("\n")) {
+      const answerLabel = document.createElement("p");
+      answerLabel.textContent = "正解の設定:";
+      answer.append(answerLabel, createCodeBlock(correctChoice));
+    } else {
+      answer.textContent = `正解: ${correctChoice}`;
+    }
     const explanation = document.createElement("p");
     explanation.textContent = question.explanation;
     lastAnswer.replaceChildren(title, answer, explanation);
@@ -113,21 +159,20 @@
       button.disabled = true;
       if (index === question.answer) {
         button.classList.add("correct");
-        button.textContent = `${question.choices[index]}　【正解】`;
-        button.setAttribute("aria-label", `${question.choices[index]}、正解`);
+        setChoiceContent(button, question.choices[index], index, "【正解】");
       }
       if (index === selectedIndex && !correct) {
         button.classList.add("wrong");
-        button.textContent = `${question.choices[index]}　【選択した回答】`;
-        button.setAttribute("aria-label", `${question.choices[index]}、選択した不正解の回答`);
+        setChoiceContent(button, question.choices[index], index, "【選択した不正解の回答】");
       }
     });
 
     saved[question.id] = correct ? "correct" : "wrong";
     const storageSaved = saveProgress();
+    const commandChoice = correctChoice.includes("\n");
     result.textContent = correct
-      ? `正解: ${correctChoice}`
-      : `不正解。正解は「${correctChoice}」。あとで要復習から解き直そう。`;
+      ? commandChoice ? "正解。緑色の設定を確認しよう。" : `正解: ${correctChoice}`
+      : commandChoice ? "不正解。正しい設定を緑色で表示した。あとで要復習から解き直そう。" : `不正解。正解は「${correctChoice}」。あとで要復習から解き直そう。`;
     if (!storageSaved) {
       result.textContent += " この端末では進捗を保存できません。";
     }
@@ -174,9 +219,7 @@
       const button = document.createElement("button");
       button.type = "button";
       button.className = "quiz-choice";
-      button.textContent = choice;
-      button.style.whiteSpace = "pre-wrap";
-      button.style.overflowWrap = "anywhere";
+      setChoiceContent(button, choice, index);
       button.addEventListener("click", () => answerQuestion(question, index, card));
       choices.appendChild(button);
     });
