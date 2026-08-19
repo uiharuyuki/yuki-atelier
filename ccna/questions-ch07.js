@@ -223,5 +223,22 @@ const CCNA_CHAPTER_07_QUESTIONS = [
     ],
     "answer": 0,
     "explanation": "HTTPはTCPポート80。拡張ACLではprotocol、送信元とワイルドカード、宛先、eq wwwの順に指定できる。"
+  },
+  {
+    "id": "network-20260819-ch07-16",
+    "chapter": "第07章",
+    "session": "2026-08-19",
+    "topic": "名前付き拡張ACL",
+    "question": "図の構成で、EdgeルータのSerial0/1からCoreルータへ出る通信を、名前付き拡張ACL Support-Policyで制御する。サポート部10.20.30.32/27から経理部172.20.0.0/19と人事部172.20.32.0/19へのHTTPSを拒否し、サポート部から開発部172.20.64.0/19へのすべてのIPv4通信を拒否する。それ以外のIPv4通信を許可する設定はどれ？",
+    "image": "assets/acl-support-policy-topology-v1.png",
+    "imageAlt": "サポート部と物流部を収容するEdgeルータが、経理部、人事部、開発部を収容するCoreルータへSerial0/1で接続されたネットワーク構成",
+    "choices": [
+      "Edge(config)# ip access-list extended Support-Policy\nEdge(config-ext-nacl)# deny tcp 10.20.30.32 0.0.0.15 172.20.0.0 0.0.63.255 eq https\nEdge(config-ext-nacl)# deny ip 10.20.30.32 0.0.0.31 172.20.64.0 0.0.31.255\nEdge(config-ext-nacl)# permit ip any any\nEdge(config)# interface serial 0/1\nEdge(config-if)# ip access-group Support-Policy out",
+      "Edge(config)# ip access-list extended Support-Policy\nEdge(config-ext-nacl)# deny tcp 10.20.30.32 0.0.0.31 172.20.0.0 0.0.63.255 eq https\nEdge(config-ext-nacl)# deny ip 10.20.30.32 0.0.0.31 172.20.64.0 0.0.31.255\nEdge(config-ext-nacl)# permit ip any any\nEdge(config)# interface serial 0/1\nEdge(config-if)# ip access-group Support-Policy out",
+      "Edge(config)# ip access-list extended Support-Policy\nEdge(config-ext-nacl)# deny udp 10.20.30.32 0.0.0.31 172.20.0.0 0.0.63.255 eq 443\nEdge(config-ext-nacl)# deny ip 10.20.30.32 0.0.0.31 172.20.64.0 0.0.31.255\nEdge(config-ext-nacl)# permit ip any any\nEdge(config)# interface serial 0/1\nEdge(config-if)# ip access-group Support-Policy out",
+      "Edge(config)# ip access-list extended Support-Policy\nEdge(config-ext-nacl)# deny tcp 10.20.30.32 0.0.0.31 172.20.0.0 0.0.63.255 eq https\nEdge(config-ext-nacl)# deny ip 10.20.30.32 0.0.0.31 172.20.64.0 0.0.31.255\nEdge(config)# interface serial 0/1\nEdge(config-if)# ip access-group Support-Policy out"
+    ],
+    "answer": 1,
+    "explanation": "サポート部/27のワイルドカードは0.0.0.31。隣接する経理部172.20.0.0/19と人事部172.20.32.0/19は172.20.0.0/18へ集約でき、ワイルドカードは0.0.63.255になる。HTTPSはTCP 443なのでdeny tcpを使い、開発部/19への全IPv4通信はdeny ipと0.0.31.255で拒否する。最後のpermit ip any anyでそれ以外を許可し、EdgeのSerial0/1へoutで適用する。0.0.0.15は送信元範囲が狭く、udp 443はHTTPSのTCPと一致せず、permit ip any anyがなければ暗黙のdenyでその他の通信も拒否される。"
   }
 ];

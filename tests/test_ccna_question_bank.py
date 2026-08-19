@@ -26,6 +26,9 @@ class CcnaQuestionBankTests(unittest.TestCase):
         self.assertIn('id="review-filter"', html)
         self.assertIn('src="questions.js"', html)
         self.assertIn('src="app.js"', html)
+        self.assertIn("第07章のACL16問", html)
+        self.assertIn("第3回確認テストの範囲", html)
+        self.assertNotIn("第7回", html)
         for obsolete in ("<h3>教科書</h3>", "OSI参照モデル", "TCP/IP モデル", "カプセル化とPDU"):
             self.assertNotIn(obsolete, html)
 
@@ -73,14 +76,14 @@ class CcnaQuestionBankTests(unittest.TestCase):
             text=True,
         )
         questions = json.loads(result.stdout)
-        self.assertEqual(len(questions), 85)
+        self.assertEqual(len(questions), 86)
         self.assertEqual(sum(question["chapter"] == "第03章" for question in questions), 10)
         self.assertEqual(sum(question["chapter"] == "第04章" for question in questions), 15)
         self.assertEqual(sum(question["chapter"] == "第05章" for question in questions), 15)
-        self.assertEqual(sum(question["chapter"] == "第07章" for question in questions), 15)
+        self.assertEqual(sum(question["chapter"] == "第07章" for question in questions), 16)
         ids = set()
         normalized_question_texts = set()
-        allowed_sessions = {"2026-07-25", "2026-07-29", "2026-08-03", "2026-08-05", "2026-08-18"}
+        allowed_sessions = {"2026-07-25", "2026-07-29", "2026-08-03", "2026-08-05", "2026-08-18", "2026-08-19"}
         allowed_topics = {
             "ネットワークとは何か",
             "LANとWAN",
@@ -155,6 +158,7 @@ class CcnaQuestionBankTests(unittest.TestCase):
             "ACLの評価順",
             "show access-lists",
             "HTTP許可の拡張ACL",
+            "名前付き拡張ACL",
         }
         for question in questions:
             self.assertIn(question["session"], allowed_sessions)
@@ -187,6 +191,13 @@ class CcnaQuestionBankTests(unittest.TestCase):
             self.assertIn(question["answer"], range(len(question["choices"])))
             self.assertTrue(question["explanation"].strip())
             self.assertNotIn("<script", question["question"] + question["explanation"])
+            if question.get("image"):
+                self.assertFalse(question["image"].startswith(("http://", "https://", "/")))
+                self.assertNotIn("..", Path(question["image"]).parts)
+                image_path = ROOT / "ccna" / question["image"]
+                self.assertTrue(image_path.is_file(), f"missing question image: {image_path}")
+                self.assertTrue(image_path.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"))
+                self.assertTrue(question.get("imageAlt", "").strip())
             if question["topic"] in {"ネットワークアドレス", "ホスト範囲"}:
                 self.assertIn("【補足】", question["question"])
 
@@ -219,6 +230,9 @@ class CcnaQuestionBankTests(unittest.TestCase):
         self.assertIn("【正解】", app)
         self.assertIn("reviewOnly && correct", app)
         self.assertIn("lastAnswer.focus()", app)
+        self.assertIn("question.image", app)
+        self.assertIn('image.loading = "lazy"', app)
+        self.assertIn('figure.className = "quiz-figure"', app)
         html = CCNA_HTML.read_text(encoding="utf-8")
         self.assertIn('role="status"', html)
         self.assertIn('tabindex="-1"', html)

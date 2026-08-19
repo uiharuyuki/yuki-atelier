@@ -154,6 +154,20 @@
     heading.className = "quiz-question";
     heading.textContent = `Q${displayIndex + 1}. ${question.question}`;
 
+    let figure = null;
+    if (question.image) {
+      figure = document.createElement("figure");
+      figure.className = "quiz-figure";
+      figure.style.margin = "0 0 18px";
+      const image = document.createElement("img");
+      image.src = question.image;
+      image.alt = question.imageAlt || "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.style.cssText = "display:block;width:100%;height:auto;border:1px solid #e0e7f0;border-radius:12px;background:#f8fafc";
+      figure.appendChild(image);
+    }
+
     const choices = document.createElement("div");
     choices.className = "quiz-choices";
     question.choices.forEach((choice, index) => {
@@ -161,6 +175,8 @@
       button.type = "button";
       button.className = "quiz-choice";
       button.textContent = choice;
+      button.style.whiteSpace = "pre-wrap";
+      button.style.overflowWrap = "anywhere";
       button.addEventListener("click", () => answerQuestion(question, index, card));
       choices.appendChild(button);
     });
@@ -178,7 +194,9 @@
     explanationText.textContent = question.explanation;
     explanation.append(explanationTitle, explanationText);
 
-    card.append(meta, heading, choices, result, explanation);
+    card.append(meta, heading);
+    if (figure) card.appendChild(figure);
+    card.append(choices, result, explanation);
     return card;
   }
 
