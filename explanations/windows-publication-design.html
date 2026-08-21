@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Windowsで安全にファイルを公開する設計を、旧設計との違いからやさしく解説します。">
+  <meta name="color-scheme" content="light dark">
+  <title>安全なファイル公開設計の変化 | yuki's atelier</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f7f2e8;
+      --surface: #fffdf8;
+      --ink: #27221d;
+      --muted: #6f655a;
+      --accent: #b55232;
+      --accent-soft: #f2ded3;
+      --line: #d9cdbf;
+      --ok: #52785f;
+      --warn: #9a6a2d;
+      --danger: #9b4238;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+      line-height: 1.85;
+      background: var(--paper);
+      color: var(--ink);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      padding: clamp(20px, 5vw, 56px) 18px 72px;
+      background:
+        linear-gradient(90deg, transparent 0 49%, color-mix(in srgb, var(--line) 24%, transparent) 49% 51%, transparent 51%) top / 36px 36px,
+        var(--paper);
+    }
+
+    article {
+      width: min(760px, 100%);
+      margin: 0 auto;
+      padding: clamp(28px, 6vw, 58px);
+      overflow-wrap: anywhere;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      box-shadow: 0 18px 50px color-mix(in srgb, var(--ink) 10%, transparent);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      margin: 0 0 1rem;
+      color: var(--accent);
+      font: 700 .76rem/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .kicker::before { width: 2.4rem; height: 2px; content: ""; background: currentColor; }
+
+    h1, h2, h3 {
+      font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif;
+      letter-spacing: .015em;
+    }
+    h1 { margin: 0; font-size: clamp(2rem, 8vw, 3.35rem); line-height: 1.15; }
+    h2 {
+      position: relative;
+      margin: 3.2rem 0 1.1rem;
+      padding-left: 1rem;
+      font-size: clamp(1.35rem, 5vw, 1.75rem);
+      line-height: 1.35;
+    }
+    h2::before {
+      position: absolute;
+      inset: .08em auto .08em 0;
+      width: 4px;
+      content: "";
+      background: var(--accent);
+    }
+    h3 { margin: 2rem 0 .65rem; font-size: 1.12rem; }
+    p { margin: .8rem 0 1.2rem; }
+    a { color: var(--accent); font-weight: 700; text-underline-offset: .22em; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    .page-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      margin: 0 0 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .page-nav a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: .55rem .85rem;
+      color: var(--accent);
+      text-decoration: none;
+      background: color-mix(in srgb, var(--accent-soft) 48%, var(--surface));
+      border: 1px solid var(--line);
+    }
+    .lead { margin: 1.3rem 0 2.2rem; color: var(--muted); font-size: 1.05rem; }
+
+    .status {
+      margin: 1.5rem 0 2rem;
+      padding: 1rem 1.15rem;
+      background: color-mix(in srgb, var(--accent-soft) 58%, var(--surface));
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--warn);
+    }
+    .status strong { color: var(--warn); }
+
+    .summary-grid, .change-grid, .steps {
+      display: grid;
+      gap: .9rem;
+    }
+    .summary-grid { grid-template-columns: repeat(3, 1fr); }
+    .summary-card, .change-card, .step {
+      padding: 1rem 1.1rem;
+      background: color-mix(in srgb, var(--paper) 56%, var(--surface));
+      border: 1px solid var(--line);
+    }
+    .summary-card strong, .change-card strong { display: block; margin-bottom: .35rem; }
+    .summary-card small, .change-card p { color: var(--muted); font-size: .9rem; }
+    .change-grid { grid-template-columns: repeat(2, 1fr); }
+    .change-card.old { border-top: 4px solid var(--muted); }
+    .change-card.new { border-top: 4px solid var(--accent); }
+
+    .diagram {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: color-mix(in srgb, var(--paper) 66%, var(--surface));
+      border: 1px solid var(--line);
+    }
+    .diagram svg { display: block; width: 100%; height: auto; }
+    .diagram figcaption { margin-top: .75rem; color: var(--muted); font-size: .9rem; }
+
+    .steps { counter-reset: step; margin: 1.3rem 0; }
+    .step { display: grid; grid-template-columns: 2.4rem 1fr; gap: .85rem; align-items: start; }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 2rem;
+      height: 2rem;
+      color: var(--surface);
+      font-weight: 800;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    .step strong { display: block; }
+    .step span { color: var(--muted); font-size: .92rem; }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .9rem;
+      margin: 1.3rem 0;
+    }
+    .decision > div { padding: 1rem 1.1rem; border: 1px solid var(--line); }
+    .decision .before { border-top: 4px solid var(--ok); }
+    .decision .after { border-top: 4px solid var(--danger); }
+    .decision strong { display: block; margin-bottom: .35rem; }
+
+    .table-wrap { margin: 1.2rem 0 1.6rem; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    th, td { padding: .8rem .9rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    th { font-family: Georgia, "Yu Mincho", "Hiragino Mincho ProN", serif; background: var(--accent-soft); }
+    tr:last-child td { border-bottom: 0; }
+
+    .note, details {
+      margin: 1.3rem 0;
+      padding: 1rem 1.1rem;
+      background: color-mix(in srgb, var(--accent-soft) 42%, var(--surface));
+      border: 1px solid var(--line);
+    }
+    summary { cursor: pointer; color: var(--accent); font-weight: 800; }
+    details p:last-child { margin-bottom: 0; }
+    code { padding: .12em .36em; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .9em; background: var(--accent-soft); border: 1px solid var(--line); border-radius: 3px; }
+    ul { padding-left: 1.4rem; }
+    li + li { margin-top: .42rem; }
+    li::marker { color: var(--accent); font-weight: 800; }
+
+    .page-footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: .8rem 1.2rem;
+      margin-top: 3.2rem;
+      padding-top: 1.4rem;
+      border-top: 1px solid var(--line);
+    }
+    .page-footer a { display: inline-flex; align-items: center; min-height: 44px; padding: .35rem 0; }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #171411;
+        --surface: #211d19;
+        --ink: #f2e9dc;
+        --muted: #b9ac9d;
+        --accent: #ef946f;
+        --accent-soft: #3c2a22;
+        --line: #4b4036;
+        --ok: #8dc39b;
+        --warn: #e3b36b;
+        --danger: #ef958c;
+      }
+    }
+    @media (max-width: 620px) {
+      html { scroll-behavior: auto; }
+      body { padding: 14px 10px 44px; }
+      article { padding: 28px 20px 34px; }
+      .summary-grid, .change-grid, .decision { grid-template-columns: 1fr; }
+      .page-nav a { flex: 1 1 9rem; }
+      .table-wrap { border: 0; }
+      table, tbody, tr, td { display: block; width: 100%; }
+      thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+      tr { margin-bottom: .8rem; border: 1px solid var(--line); }
+      td { display: grid; grid-template-columns: 6.4rem 1fr; gap: .65rem; border-bottom: 1px solid var(--line); }
+      td::before { content: attr(data-label); color: var(--muted); font-weight: 800; }
+      .page-footer a { flex: 1 1 10rem; justify-content: center; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <article>
+    <nav class="page-nav" aria-label="解説HTMLナビゲーション">
+      <a href="../index.html">atelierトップ</a>
+      <a href="./index.html">解説一覧</a>
+    </nav>
+
+    <p class="kicker">Design explanation</p>
+    <h1>安全なファイル公開設計の変化</h1>
+    <p class="lead">「作ったファイルを、壊さず、取り違えず、途中で失敗しても安全に止める」ための設計を、前の考え方と今回の候補実装の違いから説明します。</p>
+
+    <div class="status">
+      <strong>先に結論：</strong>今回できたのは、本番機能そのものではなく、Windowsの公開処理を安全に組み立てるための<strong>実装候補</strong>です。候補用のテストは通っていますが、実際のWindows環境・別プロセス競合・別PC・本番接続までは、まだ別の受入れ工程です。
+    </div>
+
+    <section aria-labelledby="overview">
+      <h2 id="overview">何を守る仕組みなのか</h2>
+      <p>たとえば、生成した検索インデックスを一時ファイルから正式なファイルへ切り替える場面を考えます。単純に「一時ファイルを正式名へ移動」すると、次の事故が起きます。</p>
+      <ul>
+        <li>作成途中のファイルを、別の処理が読んでしまう。</li>
+        <li>正式ファイルが別の内容に変わったのに、古い確認結果を信じてしまう。</li>
+        <li>公開処理の直後に失敗し、どこまで成功したか分からないのに、勝手に元へ戻そうとする。</li>
+        <li>一時ファイルの名前だけを頼りに削除し、別のファイルを消してしまう。</li>
+      </ul>
+      <p>今回の設計は、こうした「確認した直後に状況が変わる」問題を、処理の順番と失敗状態の分離で抑えるものです。</p>
+    </section>
+
+    <section aria-labelledby="difference">
+      <h2 id="difference">既存の設計から何が変わったのか</h2>
+      <p>ここでいう「既存の設計」は、先に固めたロック・読み取り・確認処理を指します。今回の変更は、それを捨てるものではなく、最後の<strong>公開・置き換え部分</strong>を別の段階として追加したものです。</p>
+      <div class="change-grid">
+        <div class="change-card old">
+          <strong>これまで</strong>
+          <p>ロックを取り、対象を確認し、読み取りや生成を行う。安全確認の中心は「正しい対象を読んでいるか」だった。</p>
+        </div>
+        <div class="change-card new">
+          <strong>今回の完成形</strong>
+          <p>生成物を一時ファイルへ隔離し、閉じたことを確認してから、公開直前にもう一度確認する。置き換え後も、同じファイルだったかを確認する。</p>
+        </div>
+        <div class="change-card old">
+          <strong>以前の失敗の扱い</strong>
+          <p>処理の途中と、公開を始めた後の失敗が同じように見えやすかった。</p>
+        </div>
+        <div class="change-card new">
+          <strong>今回の失敗の扱い</strong>
+          <p>公開前は「入力が変わった」、公開後は「成功したか断定できない」と分ける。後者は勝手に再試行しない。</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="flow">
+      <h2 id="flow">新しい処理の流れ</h2>
+      <figure class="diagram">
+        <svg viewBox="0 0 720 250" role="img" aria-labelledby="diagram-title diagram-desc">
+          <title id="diagram-title">一時ファイルを確認してから正式ファイルへ公開する流れ</title>
+          <desc id="diagram-desc">生成、確認、フラッシュ、公開直前の再確認、置き換え、公開後の確認を順番に行う図。</desc>
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="currentColor" /></marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="2" marker-end="url(#arrow)">
+            <path d="M116 64 H208" /><path d="M328 64 H420" /><path d="M540 64 H632" />
+            <path d="M632 92 V180 H540" /><path d="M420 180 H328" /><path d="M208 180 H116" />
+          </g>
+          <g fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2">
+            <rect x="12" y="35" width="104" height="58" rx="4" /><rect x="224" y="35" width="104" height="58" rx="4" />
+            <rect x="436" y="35" width="104" height="58" rx="4" /><rect x="592" y="35" width="116" height="58" rx="4" />
+            <rect x="12" y="151" width="104" height="58" rx="4" /><rect x="224" y="151" width="104" height="58" rx="4" />
+            <rect x="436" y="151" width="104" height="58" rx="4" />
+          </g>
+          <g fill="currentColor" text-anchor="middle" font-family="sans-serif" font-size="15">
+            <text x="64" y="60">生成</text><text x="64" y="80">一時ファイル</text>
+            <text x="276" y="60">内容・身元</text><text x="276" y="80">を確認</text>
+            <text x="488" y="60">Flush</text><text x="488" y="80">書き出し完了</text>
+            <text x="650" y="60">公開直前</text><text x="650" y="80">再確認</text>
+            <text x="488" y="176">置き換え</text><text x="488" y="196">Replace / Move</text>
+            <text x="276" y="176">公開後の</text><text x="276" y="196">身元確認</text>
+            <text x="64" y="176">成功なら</text><text x="64" y="196">結果を返す</text>
+          </g>
+        </svg>
+        <figcaption>重要なのは、公開処理を一回の「移動」と見なさず、公開前・公開中・公開後で責任を分けたことです。</figcaption>
+      </figure>
+
+      <div class="steps" aria-label="処理手順">
+        <div class="step"><div><strong>作業用ロックを取る</strong><span>同じデータを同時に作り直す処理がぶつからないようにする。</span></div></div>
+        <div class="step"><div><strong>正式ファイルがあるかを確定する</strong><span>ある場合と、初回公開でまだない場合を、後から変えない分岐として決める。</span></div></div>
+        <div class="step"><div><strong>専用の一時ファイルを作る</strong><span>同じ名前がすでに存在したら別名を試し、一定回数で止める。勝手に上書きしない。</span></div></div>
+        <div class="step"><div><strong>生成して、閉じて、同じ内容・身元か確認する</strong><span>ファイルの中身だけでなく、確認したファイルそのものが同じかを見る。</span></div></div>
+        <div class="step"><div><strong>Flushして公開用ロックを取る</strong><span>書き出し完了を確認してから、正式ファイルを切り替える段階へ進む。</span></div></div>
+        <div class="step"><div><strong>公開直前に最後の確認をする</strong><span>正式ファイル、一時ファイル、関連する脇ファイルの状態を再確認する。</span></div></div>
+        <div class="step"><div><strong>Windowsの分岐を固定して置き換える</strong><span>既存ファイルならReplaceFileW、初回公開ならMoveFileExWを使い、途中で別方式へ逃げない。</span></div></div>
+        <div class="step"><div><strong>公開後に再確認してから成功を返す</strong><span>置き換わった正式ファイルが、公開した一時ファイルと同じ身元か確認する。</span></div></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="branches">
+      <h2 id="branches">既存ファイルと初回公開を分ける理由</h2>
+      <p>「正式ファイルがあるか」を曖昧にしたまま、どちらにも使える便利なAPIを選ぶと、意図しない上書きやフォールバックが起きます。だから、最初に分岐を固定します。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>状態</th><th>使う操作</th><th>意味</th></tr></thead>
+          <tbody>
+            <tr><td data-label="状態">正式ファイルがある</td><td data-label="操作"><code>ReplaceFileW</code></td><td data-label="意味">既存の正式ファイルを、新しく作った内容へ置き換える。</td></tr>
+            <tr><td data-label="状態">正式ファイルがない</td><td data-label="操作"><code>MoveFileExW</code> + <code>WRITE_THROUGH</code></td><td data-label="意味">同じ場所の一時ファイルを、初めて正式名へ移す。</td></tr>
+            <tr><td data-label="状態">確認結果が不明・異常</td><td data-label="操作">公開しない</td><td data-label="意味">「たぶん初回」「たぶん既存」と推測しない。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>この分岐を明示したことで、既存ファイルなのに初回公開用の操作へ逃げる、といった実装上の抜け道をテストで検出できます。</p>
+    </section>
+
+    <section aria-labelledby="uncertainty">
+      <h2 id="uncertainty">いちばん大事な変更：失敗を無理に戻さない</h2>
+      <p>公開処理は、APIを呼んだ後に「成功したか分からない」状態がありえます。たとえば、Windowsへ置き換えを依頼した直後にエラーが返った場合、実際には置き換わっている可能性をゼロにできません。</p>
+      <div class="decision">
+        <div class="before">
+          <strong>公開を始める前</strong>
+          <p>入力や身元の不一致なら、<code>input_changed</code> などの固定された理由で止める。公開APIはまだ呼ばない。</p>
+        </div>
+        <div class="after">
+          <strong>公開を始めた後</strong>
+          <p>成否を断定できないので、<code>commit_uncertain</code> として止める。再試行・ロールバック・名前だけの削除はしない。</p>
+        </div>
+      </div>
+      <p>これは不親切に見えるけど、分からない状態を「失敗した」と決め打ちして再実行するほうが危ない。後続の監査や人間の確認に渡せる、正直な状態を残すための設計です。</p>
+    </section>
+
+    <section aria-labelledby="guards">
+      <h2 id="guards">なぜ一時ファイルをすぐ削除しないのか</h2>
+      <p>公開後にエラーが出たからといって、一時ファイルを名前だけで削除すると、その名前を別のものが取り替えていた場合に別ファイルを消す危険があります。</p>
+      <p>今回の設計では、公開前なら「自分が確認した同じファイル」だと確かめられた場合だけ、ファイルに結びついた方法で掃除します。公開開始後は状況が不確かなため、残ったものを勝手に消さず、<strong>残して監査できる状態</strong>にします。</p>
+      <details>
+        <summary>専門用語を短く説明する</summary>
+        <p><strong>HANDLE：</strong>Windowsが開いたファイルを識別するための通行証のようなもの。名前だけでなく、開いた対象そのものに結びつきます。</p>
+        <p><strong>fence：</strong>「確認したあとに対象が変わっていないか」を確かめる境界チェックです。</p>
+        <p><strong>identity：</strong>ファイル名ではなく、ボリュームやファイルIDなどから見た対象の身元です。</p>
+        <p><strong>DI候補：</strong>本物のWindows APIを直接呼ばず、偽物のAPIを差し替えて順番や失敗処理を検証できる候補実装です。</p>
+      </details>
+    </section>
+
+    <section aria-labelledby="scope">
+      <h2 id="scope">今回できたこと／まだできていないこと</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>今回の候補で確認したこと</th><th>まだ別工程のこと</th></tr></thead>
+          <tbody>
+            <tr><td data-label="候補で確認">公開前後の順番、ロック、Flush、Replace/Moveの分岐、身元確認、失敗理由、後始末の優先順位。</td><td data-label="別工程">実際のWindows API、NTFSの再解析点・ACL、実プロセス同士の競合。</td></tr>
+            <tr><td data-label="候補で確認">偽物のAPIで、条件を一つ変えたときにテストが失敗すること。</td><td data-label="別工程">実機での電源断耐久性、別PCでの再現、本番環境への接続。</td></tr>
+            <tr><td data-label="候補で確認">候補コードがパッケージや検索機能へ勝手に接続されないこと。</td><td data-label="別工程">受入れ完了、active化、production化、stage・commit・push。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note"><strong>つまり：</strong>「設計が完成した」と「機能を本番で使える」は別です。今回は、危ない部分を先に候補実装とテストで閉じた段階。実機受入れを通るまで、本番機能としては扱いません。</div>
+    </section>
+
+    <section aria-labelledby="roadmap">
+      <h2 id="roadmap">全体の中での位置づけ</h2>
+      <p>今回の公開処理は、全体の一段階です。ざっくり言うと、次の順番で強くしていきます。</p>
+      <ol>
+        <li><strong>ロック：</strong>同時作業の衝突を防ぐ。</li>
+        <li><strong>読み取り：</strong>確認したデータを取り違えない。</li>
+        <li><strong>公開：</strong>生成物を安全に正式名へ切り替える。今回ここ。</li>
+        <li><strong>統合された後始末：</strong>複数のHANDLEや一時ファイルを安全に解放する。</li>
+        <li><strong>固定ランチャー：</strong>決めたWindows実行環境以外へ勝手に逃げない。</li>
+        <li><strong>実機受入れ：</strong>Windows、競合、別PCで本当に成立するか確認する。</li>
+      </ol>
+      <p>この分割の目的は、巨大な完成宣言を一度に出さず、どこまで証明できたかを段階ごとに明示することです。</p>
+    </section>
+
+    <section aria-labelledby="sources">
+      <h2 id="sources">参考資料</h2>
+      <ul>
+        <li><a href="https://learn.microsoft.com/windows/win32/api/winbase/nf-winbase-replacefilew">Microsoft Learn: ReplaceFileW</a></li>
+        <li><a href="https://learn.microsoft.com/windows/win32/api/winbase/nf-winbase-movefileexw">Microsoft Learn: MoveFileExW</a></li>
+        <li><a href="https://learn.microsoft.com/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers">Microsoft Learn: FlushFileBuffers</a></li>
+      </ul>
+      <p class="note">このページは一般向けの設計解説です。個人情報、認証情報、内部ログ、実装環境のパスや状態は掲載していません。</p>
+    </section>
+
+    <footer class="page-footer">
+      <a href="./index.html">解説一覧へ戻る</a>
+      <a href="../index.html">yuki's atelierへ戻る</a>
+    </footer>
+  </article>
+</body>
+</html>
